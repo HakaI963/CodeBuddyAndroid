@@ -128,7 +128,7 @@ class WebShell(
             builtInZoomControls = false
             displayZoomControls = false
             cacheMode = WebSettings.LOAD_DEFAULT
-            geolocationEnabled = false
+            setGeolocationEnabled(false)
             setSupportMultipleWindows(false)
             textZoom = 100
             safeBrowsingEnabled = true
@@ -240,7 +240,6 @@ class WebShell(
             container.removeView(view)
             view.stopLoading()
             view.webChromeClient = null
-            view.webViewClient = null
             view.destroy()
         }
         webView = null
