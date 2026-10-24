@@ -1,9 +1,28 @@
 # CodeBuddy Mobile — Implementation Report
 
 Package: `com.flux.codebuddy` (debug: `com.flux.codebuddy.debug`)
-Version: 1.0.0 (versionCode 1)
+Version: 1.0.1 (versionCode 2)
 Repository: https://github.com/HakaI963/CodeBuddyAndroid
 Releases: https://github.com/HakaI963/CodeBuddyAndroid/releases
+
+## 0. Fixes in 1.0.1
+
+Two problems caused the app to sit on "Connecting to CodeBuddy…" forever:
+
+1. **WebView clients were installed before they existed.** `WebShell` called
+   `configure(initialWebView)` from an `init` block declared above the
+   `shellClient` / `shellChromeClient` properties. Kotlin runs property
+   initializers and `init` blocks in declaration order, so both were still `null`
+   when assigned to the WebView. With no `WebViewClient`/`WebChromeClient` the app
+   received no `onPageStarted`, `onProgressChanged`, `onPageFinished` or
+   `onReceivedError` callbacks, so the loading overlay could never be dismissed and
+   the toolbar stayed on "Connecting…". The `init` block now sits below the client
+   declarations.
+2. **No timeout on a stalled request.** A TCP connect to an unreachable address can
+   stay pending for minutes without an error callback. The app now probes the
+   server after 8 s (and again at 20 s) and replaces the spinner with a specific
+   diagnosis: refused, timed out, unknown host, TLS, wrong server, or offline, with
+   the exact command to start the server or the `adb reverse` alternative.
 
 ## 1. What was built
 
@@ -81,8 +100,8 @@ The build host is aarch64 and has no `/dev/kvm`; Google Maven publishes no
 therefore compiled by GitHub Actions on `ubuntu-latest`, which also matches the
 requested workflow.
 
-Workflow run [`40103610669`](https://github.com/HakaI963/CodeBuddyAndroid/actions/runs/40103610669)
-(commit `9184cfa`) completed green:
+Workflow run [`40106469461`](https://github.com/HakaI963/CodeBuddyAndroid/actions/runs/40106469461)
+(commit `c876d7c`) completed green:
 
 ```
 ./gradlew --no-daemon --stacktrace testDebugUnitTest lintDebug assembleDebug assembleRelease
@@ -115,7 +134,7 @@ API 26+. `v1` is unnecessary and `v3` requires `minSdk >= 28`.)
 `aapt2 dump badging` on the release APK:
 
 ```
-package: name='com.flux.codebuddy' versionCode='1' versionName='1.0.0' compileSdkVersion='35'
+package: name='com.flux.codebuddy' versionCode='2' versionName='1.0.1' compileSdkVersion='35'
 minSdkVersion:'26'
 targetSdkVersion:'35'
 uses-permission: name='android.permission.INTERNET'
@@ -129,11 +148,11 @@ launchable-activity: name='com.flux.codebuddy.MainActivity'
 
 | Artifact | Bytes | Size |
 | --- | ---: | ---: |
-| `CodeBuddyMobile-1.0.0-release.apk` | 165,872 | 162 KiB |
-| `CodeBuddyMobile-1.0.0-debug.apk` | 2,639,622 | 2.5 MiB |
+| `CodeBuddyMobile-release.apk` | 167,788 | 164 KiB |
+| `CodeBuddyMobile-debug.apk` | 2,644,382 | 2.5 MiB |
 
-The release APK contains a 216,600-byte `classes.dex`, a 22,312-byte
-`resources.arsc`, and obfuscated resources; `MainActivity` and
+The release APK contains a ~218 KB `classes.dex`, a ~22 KB `resources.arsc`, and
+obfuscated resources; `MainActivity` and
 `ui.MaxWidthLinearLayout` are retained by name because the layout inflater needs
 them.
 
@@ -143,12 +162,8 @@ that builds the APKs, so they always match the published files. (The build is no
 byte-reproducible: `META-INF/version-control-info.textproto` embeds commit data, so
 each run produces different bytes.)
 
-Checksums of the assets attached to the `v1.0.0` release (verified after download):
-
-```
-0c07cecfcd9b02af8f0ae00d2c3f787fd434af03fbfc9ab703cfe568625c5ac2  CodeBuddyMobile-1.0.0-debug.apk
-1f0654e76d5385efd8c6c46e9da420afd5df310d613e1d759033a9225a126fb5  CodeBuddyMobile-1.0.0-release.apk
-```
+Each release publishes its own `SHA256SUMS.txt`; the values were verified with
+`sha256sum -c` after downloading the assets of that release.
 
 ## 6. Tests that were NOT run
 
@@ -178,7 +193,7 @@ Checksums of the assets attached to the `v1.0.0` release (verified after downloa
 
 1. Start the server on the Linux host:
    `codebuddy --serve --host 0.0.0.0 --port 7890`
-2. Install `CodeBuddyMobile-1.0.0-release.apk`.
+2. Install `CodeBuddyMobile-release.apk`.
 3. Enter the server URL, e.g. `http://192.168.1.20:7890`, optionally a display name,
    and tap **Connect**. Use **Test** to probe reachability first.
 4. For USB-only setups: `adb reverse tcp:7890 tcp:7890`, then connect to
