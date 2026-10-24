@@ -187,15 +187,15 @@ The build host is aarch64 and has no `/dev/kvm`; Google Maven publishes no
 therefore compiled by GitHub Actions on `ubuntu-latest`, which also matches the
 requested workflow.
 
-Workflow runs [`40114071790`](https://github.com/HakaI963/CodeBuddyAndroid/actions/runs/40114071790)
-(`main`, commit `6207975`) and [`40114464851`](https://github.com/HakaI963/CodeBuddyAndroid/actions/runs/40114464851)
-(tag `v1.0.3`) completed green:
+Workflow runs [`40116287003`](https://github.com/HakaI963/CodeBuddyAndroid/actions/runs/40116287003)
+(`main`, commit `2d7423d`) and [`40116490175`](https://github.com/HakaI963/CodeBuddyAndroid/actions/runs/40116490175)
+(tag `v1.0.4`) completed green:
 
 ```
 ./gradlew --no-daemon --stacktrace testDebugUnitTest lintDebug assembleDebug assembleRelease
 ```
 
-- `testDebugUnitTest` — **20 JVM unit tests**, all passing. `ServerUrlTest.kt`
+- `testDebugUnitTest` — **21 JVM unit tests**, all passing. `ServerUrlTest.kt`
   covers bare-address normalization, query/fragment preservation, HTTPS public
   hosts, public HTTP rejection (incl. 172.32.x, 100.128.x, IPv6 GUA), private IPv4
   ranges, local names, credentials, password query (incl. percent-encoded), invalid
@@ -226,7 +226,7 @@ API 26+. `v1` is unnecessary and `v3` requires `minSdk >= 28`.)
 `aapt2 dump badging` on the release APK:
 
 ```
-package: name='com.flux.codebuddy' versionCode='4' versionName='1.0.3' compileSdkVersion='35'
+package: name='com.flux.codebuddy' versionCode='5' versionName='1.0.4' compileSdkVersion='35'
 minSdkVersion:'26'
 targetSdkVersion:'35'
 uses-permission: name='android.permission.INTERNET'
@@ -240,10 +240,10 @@ launchable-activity: name='com.flux.codebuddy.MainActivity'
 
 | Artifact | Bytes | Size |
 | --- | ---: | ---: |
-| `CodeBuddyMobile-release.apk` | 170,716 | 167 KiB |
-| `CodeBuddyMobile-debug.apk` | 2,651,350 | 2.5 MiB |
+| `CodeBuddyMobile-release.apk` | 170,972 | 167 KiB |
+| `CodeBuddyMobile-debug.apk` | 2,651,614 | 2.5 MiB |
 
-The release APK contains a 224,088-byte `classes.dex`, a 23,560-byte
+The release APK contains a 224,704-byte `classes.dex`, a 23,560-byte
 `resources.arsc`, and obfuscated resources; `MainActivity` and
 `ui.MaxWidthLinearLayout` are retained by name because the layout inflater needs
 them. The 1.0.3 additions were confirmed inside the shipped `classes.dex`
