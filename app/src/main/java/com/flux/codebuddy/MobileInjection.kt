@@ -72,6 +72,18 @@ object MobileInjection {
             try { localStorage.setItem('$SCALE_KEY', String(S)); } catch (e) {}
           }
           function deviceWidth(){
+            // screen.width is the display, not the window: display-cutout
+            // padding, freeform windows and split screen make the WebView
+            // narrower, which would push the right edge off-screen. The visual
+            // viewport in CSS px times its scale is the real window width and
+            // stays constant whatever viewport meta is applied.
+            try {
+              var vv = window.visualViewport;
+              if (vv && vv.width && vv.scale) {
+                var vw = vv.width * vv.scale;
+                if (vw > 200) return vw;
+              }
+            } catch (e) {}
             var w = 0;
             try { w = Math.max(screen.width || 0, screen.height || 0); } catch (e) {}
             return w || window.innerWidth || 844;

@@ -29,6 +29,13 @@ class MobileInjectionTest {
     }
 
     @Test
+    fun fitUsesTheWindowWidthNotTheDisplayWidth() {
+        val js = MobileInjection.documentStartScript(0.6f)
+        assertTrue(js.contains("visualViewport"))
+        assertTrue(js.contains("vv.width * vv.scale"))
+    }
+
+    @Test
     fun cssDisablesTextAutosizingAndWidensTheChatColumn() {
         val script = MobileInjection.documentStartScript(1f)
         assertTrue(script.contains("text-size-adjust:100%"))

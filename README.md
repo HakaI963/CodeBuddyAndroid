@@ -8,7 +8,7 @@ persistent server configuration, and a reachability check.
 
 Package: `com.flux.codebuddy`  
 App name: **CodeBuddy Mobile**  
-Version: 1.0.3 (versionCode 4)
+Version: 1.0.4 (versionCode 5)
 
 ## What this is
 
@@ -161,7 +161,9 @@ replace it. It makes five reversible client-side changes:
    chat, drawer sidebar); smaller values widen the layout until the SPA switches to
    its own desktop layout, which is what makes 5-6x smaller sizes usable.
    `minimum-scale=0.05` is required because Chrome otherwise clamps page scale to
-   0.25 and the viewport never widens.
+   0.25 and the viewport never widens. The zoom is computed from the real WebView
+   width (`visualViewport.width * scale`), not `screen.width`, so display-cutout
+   insets and freeform windows cannot push the right edge off-screen.
 4. Exposes the scale as **Settings -> UI size**, 1.00x down to 0.17x (~5.9x smaller
    than 1.00x), stored in `SharedPreferences`, applied to the live page and carried
    across reloads through `localStorage`. The default is 0.60x.
@@ -209,6 +211,7 @@ No server files are modified. Removing `MobileInjection` restores the stock UI.
 | "Use HTTPS for servers outside your local network" | Expected policy. Use HTTPS, a VPN, or the private LAN IP. |
 | IP changed after DHCP lease | Toolbar status -> Settings -> update URL -> Save & connect. |
 | Keyboard covers composer | The activity uses `adjustResize` plus IME insets. If an OEM ignores insets, report the device. |
+| Right edge (send button, toolbar icons) cut off at small sizes | Fixed in 1.0.4: the zoom now follows the real window width instead of the display width. Update the app. |
 | Blob download fails | Use the desktop web UI for that file. |
 
 ## Project layout

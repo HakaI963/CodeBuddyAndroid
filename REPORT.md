@@ -1,11 +1,30 @@
 # CodeBuddy Mobile — Implementation Report
 
 Package: `com.flux.codebuddy` (debug: `com.flux.codebuddy.debug`)
-Version: 1.0.3 (versionCode 4)
+Version: 1.0.4 (versionCode 5)
 Repository: https://github.com/HakaI963/CodeBuddyAndroid
 Releases: https://github.com/HakaI963/CodeBuddyAndroid/releases
 
-## 0. Changes in 1.0.3
+## 0. Fixes in 1.0.4
+
+At smaller sizes the right edge of the web UI was cut off (send button, top-right
+toolbar icons, the last card), which got worse as the slider moved down.
+
+- **Cause:** the zoom was derived from `max(screen.width, screen.height)`, i.e. the
+  display. The WebView is not the display: the activity pads the content for
+  display-cutout insets, and freeform/split-screen windows are narrower too. With a
+  cutout of ~80 CSS px on a 844 px-wide phone the window is 764 px, so the page was
+  laid out 844/760 of the window width and the right ~10% sat outside the screen.
+- **Fix:** the fit now uses the real window width,
+  `visualViewport.width * visualViewport.scale`. The product is the window width in
+  CSS px at any page scale, so it is stable before and after the viewport meta is
+  applied. `screen` is only a fallback for WebViews without `visualViewport`.
+- Verified by simulating a 764x390 window while `screen` still reports 844x390:
+  before, the visual viewport was 1147 of a 1267 CSS px layout (10% off-screen);
+  after, `visualViewport.scale` is 0.6032 and the visual viewport is exactly 1267,
+  with no element crossing the right edge at any preset (1.00x through 0.17x).
+
+## 0.1 Changes in 1.0.3
 
 The 1.0.2 layout was still too large for the reporter, and one fixed size cannot
 fit both a 5" phone and a tablet. The UI size is now user-selectable.
@@ -48,7 +67,7 @@ instead of a viewport media query, so they keep matching when the layout viewpor
 grows. Switching 0.60 -> 0.17 -> 0.60 produced no JavaScript errors, and the value
 survived a reload each time.
 
-## 0.1 Fixes in 1.0.2
+## 0.2 Fixes in 1.0.2
 
 The web UI was rendering its **desktop** layout inside the phone. At 844x390 CSS px
 the SPA keeps a 360px session panel and a 56px rail open, leaving roughly half the
@@ -66,7 +85,7 @@ width for chat, and its default type scale filled most of the 390px height.
 Measured at 844x390 with the new layer: layout viewport 760x352 at 1.11x zoom,
 header 44px, composer 86px, chat column 760px wide (was 428px).
 
-## 0.2 Fixes in 1.0.1
+## 0.3 Fixes in 1.0.1
 
 Two problems caused the app to sit on "Connecting to CodeBuddy…" forever:
 
