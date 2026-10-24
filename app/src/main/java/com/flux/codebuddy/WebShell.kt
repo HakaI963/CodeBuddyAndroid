@@ -104,10 +104,6 @@ class WebShell(
         }
     }
 
-    init {
-        configure(initialWebView)
-    }
-
     @SuppressLint("SetJavaScriptEnabled")
     private fun configure(webView: WebView) {
         webView.setBackgroundColor(Color.BLACK)
@@ -186,6 +182,30 @@ class WebShell(
     }
 
     fun canGoBack(): Boolean = webView?.canGoBack() == true
+
+    /**
+     * Abandons the current navigation after the shell has already reported a
+     * failure, so late callbacks cannot overwrite the error with a stale page.
+     */
+    fun abortLoad() {
+        mainFrameError = true
+        webView?.stopLoading()
+    }
+
+    /**
+     * Re-checks whether the current document is the login page. Used as a
+     * fallback when `onPageFinished` is delayed by a page that keeps loading.
+     */
+    fun refreshLoginState(onResult: (Boolean) -> Unit) {
+        val view = webView
+        if (view == null) {
+            onResult(false)
+            return
+        }
+        view.evaluateJavascript(MobileInjection.LOGIN_CHECK_JS) { result ->
+            onResult(result?.contains("login") == true)
+        }
+    }
 
     fun goBack() {
         webView?.goBack()
@@ -364,6 +384,7 @@ class WebShell(
         }
 
         override fun onPageCommitVisible(view: WebView, url: String?) {
+            if (mainFrameError) return
             listener.onContentVisible()
         }
 
@@ -592,6 +613,12 @@ class WebShell(
             }
             return true
         }
+    }
+
+    init {
+        // Must stay below the client properties: Kotlin initializes properties
+        // and init blocks in declaration order, and configure() installs them.
+        configure(initialWebView)
     }
 
     private data class PendingDownload(

@@ -49,6 +49,11 @@ class MainActivity : ComponentActivity(), WebShellListener {
     private var wasImeVisible = false
     private var lastBackAt = 0L
 
+    private var awaitingLoad = false
+    private var suppressFailure = false
+    private var connectCheck: Runnable? = null
+    private var statusCheck: Runnable? = null
+
     private val probeExecutor = Executors.newSingleThreadExecutor()
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
     private var restoredUrl: String? = null
@@ -313,6 +318,8 @@ class MainActivity : ComponentActivity(), WebShellListener {
         currentConfig = config
         currentTarget = target
         lastLoadFailed = false
+        suppressFailure = false
+        awaitingLoad = true
         binding.toolbar.visibility = View.VISIBLE
         binding.errorOverlay.visibility = View.GONE
         binding.configContainer.visibility = View.GONE
@@ -320,18 +327,124 @@ class MainActivity : ComponentActivity(), WebShellListener {
         binding.progress.visibility = View.VISIBLE
         setStatus(ConnectionState.CONNECTING)
         webShell.load(target, url)
+        armConnectCheck()
     }
 
     private fun reconnect() {
-        if (setupMode || currentTarget == null) return
+        if (setupMode) return
+        val target = currentTarget ?: return
         if (binding.configContainer.visibility == View.VISIBLE) {
             closeSettings()
         }
         binding.errorOverlay.visibility = View.GONE
+
+        if (lastLoadFailed || connectionState == ConnectionState.ERROR) {
+            val config = currentConfig ?: return
+            connectCurrent(config, target, target.startUrl, fullScreenLoading = true)
+            return
+        }
+
         binding.progress.visibility = View.VISIBLE
         lastLoadFailed = false
+        suppressFailure = false
+        awaitingLoad = true
         setStatus(ConnectionState.CONNECTING)
         webShell.reconnect()
+        armConnectCheck()
+    }
+
+    /**
+     * A WebView request to an unreachable host can stay pending for minutes with
+     * no error callback. Probe in parallel and surface a specific failure instead
+     * of showing the spinner forever.
+     */
+    private fun armConnectCheck() {
+        cancelChecks()
+        val runnable = Runnable { onConnectStalled() }
+        connectCheck = runnable
+        binding.root.postDelayed(runnable, CONNECT_PROBE_DELAY_MS)
+    }
+
+    private fun onConnectStalled() {
+        connectCheck = null
+        if (!awaitingLoad || connectionState != ConnectionState.CONNECTING) return
+        val target = currentTarget ?: return
+
+        if (!isNetworkAvailable()) {
+            showConnectFailure(getString(R.string.error_offline))
+            return
+        }
+
+        probeExecutor.execute {
+            val probe = ServerProbe.probe(target)
+            runOnUiThread {
+                if (isFinishing || isDestroyed) return@runOnUiThread
+                if (!awaitingLoad || connectionState != ConnectionState.CONNECTING) {
+                    return@runOnUiThread
+                }
+                when (probe) {
+                    is ProbeResult.Reachable -> armHardTimeout()
+                    is ProbeResult.Failed -> showConnectFailure(probeFailureMessage(probe))
+                }
+            }
+        }
+    }
+
+    private fun armHardTimeout() {
+        cancelChecks()
+        val runnable = Runnable {
+            connectCheck = null
+            if (awaitingLoad && connectionState == ConnectionState.CONNECTING) {
+                showConnectFailure(getString(R.string.error_stalled))
+            }
+        }
+        connectCheck = runnable
+        binding.root.postDelayed(runnable, CONNECT_HARD_TIMEOUT_MS)
+    }
+
+    private fun showConnectFailure(message: String) {
+        cancelChecks()
+        awaitingLoad = false
+        lastLoadFailed = true
+        suppressFailure = true
+        webShell.abortLoad()
+        binding.loadingOverlay.visibility = View.GONE
+        binding.progress.visibility = View.GONE
+        binding.errorMessage.text = message
+        binding.errorOverlay.visibility = View.VISIBLE
+        setStatus(ConnectionState.ERROR)
+    }
+
+    private fun probeFailureMessage(failed: ProbeResult.Failed): String {
+        return when (failed.kind) {
+            ProbeResult.Failure.REFUSED -> if (isLoopbackHost()) {
+                getString(R.string.error_loopback)
+            } else {
+                getString(R.string.error_refused_lan)
+            }
+
+            ProbeResult.Failure.TIMEOUT -> getString(R.string.error_timeout_lan)
+            ProbeResult.Failure.UNKNOWN_HOST -> getString(R.string.error_host_lookup)
+            ProbeResult.Failure.TLS -> getString(R.string.error_ssl)
+            ProbeResult.Failure.NOT_CODEBUDDY -> getString(R.string.probe_not_codebuddy)
+            ProbeResult.Failure.HTTP -> getString(R.string.error_http, failed.httpCode ?: 0)
+            ProbeResult.Failure.GENERIC -> getString(R.string.error_stalled)
+        }
+    }
+
+    private fun isLoopbackHost(): Boolean {
+        val host = currentTarget?.host ?: return false
+        return host == "localhost" ||
+            host == "::1" ||
+            host == "0:0:0:0:0:0:0:1" ||
+            host.startsWith("127.")
+    }
+
+    private fun cancelChecks() {
+        connectCheck?.let { binding.root.removeCallbacks(it) }
+        connectCheck = null
+        statusCheck?.let { binding.root.removeCallbacks(it) }
+        statusCheck = null
     }
 
     private fun handleProbe(url: String) {
@@ -499,10 +612,35 @@ class MainActivity : ComponentActivity(), WebShellListener {
 
     override fun onContentVisible() {
         contentLoadedOnce = true
+        awaitingLoad = false
         binding.loadingOverlay.visibility = View.GONE
+        cancelChecks()
+        scheduleStatusCheck()
+    }
+
+    /**
+     * A page that keeps a request open can delay `onPageFinished`. Re-read the
+     * login state once the document is visible so the toolbar does not stay on
+     * "Connecting…".
+     */
+    private fun scheduleStatusCheck() {
+        if (connectionState != ConnectionState.CONNECTING) return
+        val runnable = Runnable {
+            statusCheck = null
+            if (isFinishing || isDestroyed) return@Runnable
+            if (connectionState != ConnectionState.CONNECTING) return@Runnable
+            webShell.refreshLoginState { login ->
+                if (!isFinishing && !isDestroyed) onLoaded(login)
+            }
+        }
+        statusCheck = runnable
+        binding.root.postDelayed(runnable, 1_500)
     }
 
     override fun onLoaded(loginRequired: Boolean) {
+        cancelChecks()
+        awaitingLoad = false
+        suppressFailure = false
         contentLoadedOnce = true
         binding.loadingOverlay.visibility = View.GONE
         binding.progress.visibility = View.GONE
@@ -518,6 +656,11 @@ class MainActivity : ComponentActivity(), WebShellListener {
     }
 
     override fun onFailure(failure: ShellFailure) {
+        // A failure raised by aborting the load must not replace the specific
+        // diagnosis that is already on screen.
+        if (suppressFailure) return
+        cancelChecks()
+        awaitingLoad = false
         lastLoadFailed = true
         binding.loadingOverlay.visibility = View.GONE
         binding.progress.visibility = View.GONE
@@ -580,6 +723,7 @@ class MainActivity : ComponentActivity(), WebShellListener {
     }
 
     override fun onDestroy() {
+        cancelChecks()
         networkCallback?.let { callback ->
             try {
                 getSystemService(ConnectivityManager::class.java)
@@ -608,5 +752,7 @@ class MainActivity : ComponentActivity(), WebShellListener {
 
     private companion object {
         const val KEY_LAST_URL = "last_url"
+        const val CONNECT_PROBE_DELAY_MS = 8_000L
+        const val CONNECT_HARD_TIMEOUT_MS = 20_000L
     }
 }

@@ -188,7 +188,9 @@ No server files are modified. Removing `MobileInjection` restores the stock UI.
 
 | Symptom | Fix |
 | --- | --- |
+| Stuck on "Connecting to CodeBuddy…" | The app now gives up after ~8 s and probes the server. If it still spins, the WebView request is hanging at the TCP level: check that the IP is the computer's, that both devices are on the same network, and that no firewall drops port 7890. |
 | Connection refused | Server is bound to 127.0.0.1. Restart with `--host 0.0.0.0`; allow port 7890. |
+| "Nothing is listening on the phone itself" | The URL uses `127.0.0.1`. Either run `adb reverse tcp:7890 tcp:7890` on the computer, or use the computer's LAN IP with `--host 0.0.0.0`. |
 | Timed out | Wrong IP, different Wi-Fi/VLAN, or AP isolation. Ping the Linux IP from another device. |
 | Login required | Expected. Enter the password printed by the CodeBuddy server. |
 | Certificate not trusted | Use a valid certificate or a VPN; the app never bypasses TLS. |

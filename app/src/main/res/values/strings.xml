@@ -71,6 +71,10 @@
     <string name="error_renderer">The web view stopped unexpectedly. Tap Retry to reload.</string>
     <string name="error_timeout">Timed out. Check the IP address, port, and firewall.</string>
     <string name="error_refused">Connection refused. Start CodeBuddy with --host 0.0.0.0 and allow the port through the firewall.</string>
+    <string name="error_refused_lan">Connection refused. Start the server with:\ncodebuddy --serve --host 0.0.0.0 --port 7890\nand allow the port through the firewall.</string>
+    <string name="error_loopback">Nothing is listening on the phone itself. Either run\nadb reverse tcp:7890 tcp:7890\non the computer and keep http://127.0.0.1:7890, or start CodeBuddy with --host 0.0.0.0 and use the computer LAN address.</string>
+    <string name="error_timeout_lan">No response from the server. Check the IP address, make sure CodeBuddy runs with --host 0.0.0.0, and check that a firewall or VPN is not blocking the port.</string>
+    <string name="error_stalled">The page did not finish loading. The server may be busy or the connection blocked. Tap Retry.</string>
     <string name="error_unknown_host">Server address not found. Check the URL.</string>
     <string name="error_host_lookup">Server address not found. Check the URL and that the device is on the same network.</string>
 

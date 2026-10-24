@@ -83,11 +83,11 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p artifacts
-          cp app/build/outputs/apk/debug/app-debug.apk artifacts/CodeBuddyMobile-1.0.0-debug.apk
+          cp app/build/outputs/apk/debug/app-debug.apk artifacts/CodeBuddyMobile-debug.apk
           if [ -f app/build/outputs/apk/release/app-release.apk ]; then
-            cp app/build/outputs/apk/release/app-release.apk artifacts/CodeBuddyMobile-1.0.0-release.apk
+            cp app/build/outputs/apk/release/app-release.apk artifacts/CodeBuddyMobile-release.apk
           elif [ -f app/build/outputs/apk/release/app-release-unsigned.apk ]; then
-            cp app/build/outputs/apk/release/app-release-unsigned.apk artifacts/CodeBuddyMobile-1.0.0-release-unsigned.apk
+            cp app/build/outputs/apk/release/app-release-unsigned.apk artifacts/CodeBuddyMobile-release-unsigned.apk
             echo "Release APK is unsigned (no keystore secret)."
           else
             echo "No release APK produced" >&2
@@ -102,11 +102,11 @@ jobs:
           set -euo pipefail
           BT="$ANDROID_HOME/build-tools/35.0.0"
           echo "===== aapt2 badging (release) ====="
-          "$BT/aapt2" dump badging artifacts/CodeBuddyMobile-1.0.0-release.apk | head -14
+          "$BT/aapt2" dump badging artifacts/CodeBuddyMobile-release.apk | head -14
           echo "===== apksigner verify (release) ====="
-          "$BT/apksigner" verify --verbose --print-certs artifacts/CodeBuddyMobile-1.0.0-release.apk
+          "$BT/apksigner" verify --verbose --print-certs artifacts/CodeBuddyMobile-release.apk
           echo "===== apksigner verify (debug) ====="
-          "$BT/apksigner" verify --verbose --print-certs artifacts/CodeBuddyMobile-1.0.0-debug.apk
+          "$BT/apksigner" verify --verbose --print-certs artifacts/CodeBuddyMobile-debug.apk
 
       - name: Publish APKs to GitHub Release
         if: github.event_name != 'pull_request'
@@ -120,8 +120,8 @@ jobs:
           body: |
             Automated build of CodeBuddy Mobile.
 
-            - `CodeBuddyMobile-1.0.0-release.apk` - signed release build (R8 + resource shrinking)
-            - `CodeBuddyMobile-1.0.0-debug.apk` - debug build (`com.flux.codebuddy.debug`)
+            - `CodeBuddyMobile-release.apk` - signed release build (R8 + resource shrinking)
+            - `CodeBuddyMobile-debug.apk` - debug build (`com.flux.codebuddy.debug`)
             - `SHA256SUMS.txt` - checksums
           files: |
             artifacts/*.apk
