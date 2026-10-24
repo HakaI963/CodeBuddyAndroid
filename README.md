@@ -101,7 +101,14 @@ If the signing variables are absent, the release variant is produced as
 ### GitHub Actions
 
 `.github/workflows/android.yml` runs unit tests, lint, debug and release builds on
-every push/PR, uploads the APKs, and attaches them to a GitHub Release on `v*` tags.
+every push/PR. Because GitHub Actions artifact storage is quota-limited, the APKs
+are published as **GitHub Release assets** instead of workflow artifacts:
+
+- every push to `main` updates the rolling `ci-latest` pre-release;
+- a `v*` tag creates the corresponding release (e.g. `v1.0.0`).
+
+The workflow also verifies the release APK with `apksigner verify` and prints the
+package/version/SDK data with `aapt2 dump badging`.
 
 Set these repository secrets to produce a signed release in CI:
 
@@ -112,7 +119,7 @@ Set these repository secrets to produce a signed release in CI:
 | `ANDROID_KEY_ALIAS` | `codebuddy` |
 | `ANDROID_KEY_PASSWORD` | key password |
 
-Without the secrets the workflow still builds and uploads an unsigned release APK.
+Without the secrets the workflow still builds and publishes an unsigned release APK.
 
 ## Security model
 
