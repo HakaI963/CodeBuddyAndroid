@@ -8,7 +8,7 @@ persistent server configuration, and a reachability check.
 
 Package: `com.flux.codebuddy`  
 App name: **CodeBuddy Mobile**  
-Version: 1.0.2 (versionCode 3)
+Version: 1.0.3 (versionCode 4)
 
 ## What this is
 
@@ -149,19 +149,28 @@ Without the secrets the workflow still builds and publishes an unsigned release 
 
 The web UI is already responsive (breakpoints at 767/768 px, mobile sidebar and
 overlay classes, 13 px chat text below 767 px). The app therefore does **not**
-replace it. It makes four reversible client-side changes:
+replace it. It makes five reversible client-side changes:
 
 1. Forces the existing dark theme (`codebuddy-theme` = `{"mode":"dark"}`).
 2. Seeds the existing sidebar as collapsed with a 240 px width on first run
    (`codebuddy-sidebar`), only if no preference exists. The toolbar panel button
    toggles the web UI's own sidebar.
-3. Forces the web UI's own phone layout on phone-sized screens: the viewport is
-   narrowed to `width=760`, so the SPA drops its permanent 360 px session panel and
-   uses the full-width chat layout with a drawer sidebar. Without this, the desktop
-   layout at 844 px leaves only ~428 px for the chat.
-4. Adds CSS scoped to `(orientation:landscape) and (max-height:560px)` that sets a
-   12 px root font, a 44 px header, an ~86 px composer and a login page that fits a
-   short viewport. Tablets (>1000 px) keep the desktop layout and are untouched.
+3. Scales the UI through the viewport instead of stretching it: the layout
+   viewport becomes `width = 760 / scale` with the matching `initial-scale`, so the
+   SPA reflows. `1.00x` reproduces the 1.0.2 phone layout (`width=760`, full-width
+   chat, drawer sidebar); smaller values widen the layout until the SPA switches to
+   its own desktop layout, which is what makes 5-6x smaller sizes usable.
+   `minimum-scale=0.05` is required because Chrome otherwise clamps page scale to
+   0.25 and the viewport never widens.
+4. Exposes the scale as **Settings -> UI size**, 1.00x down to 0.17x (~5.9x smaller
+   than 1.00x), stored in `SharedPreferences`, applied to the live page and carried
+   across reloads through `localStorage`. The default is 0.60x.
+5. Adds CSS that disables Android text autosizing (`text-size-adjust:100%`), removes
+   the 880 px chat/composer cap on wide scaled viewports
+   (`--conversation-content-max-width:100%`), and - on phone-sized screens (short
+   screen side <= 560 px, applied as an `html.cbm-compact` class so it keeps
+   matching after the page is zoomed out) - sets a 12 px root font, a 44 px header
+   and an ~86 px composer so the login page and composer fit.
 
 No server files are modified. Removing `MobileInjection` restores the stock UI.
 

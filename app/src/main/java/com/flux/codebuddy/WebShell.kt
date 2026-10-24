@@ -75,6 +75,8 @@ class WebShell(
     private var target: ServerTarget? = null
     private var lastUrl: String? = null
     private var mainFrameError = false
+    /** Selected UI size; set by the activity before [load]. */
+    var uiScale: Float = UiScale.DEFAULT
     private var documentStartSupported =
         WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)
     private val injectedOrigins = mutableSetOf<String>()
@@ -162,7 +164,7 @@ class WebShell(
             try {
                 WebViewCompat.addDocumentStartJavaScript(
                     view,
-                    MobileInjection.DOCUMENT_START_SCRIPT,
+                    MobileInjection.documentStartScript(uiScale),
                     setOf(target.origin),
                 )
             } catch (_: Exception) {
@@ -172,6 +174,18 @@ class WebShell(
         }
 
         view.loadUrl(url)
+    }
+
+    /**
+     * Applies a new UI size to the loaded document and remembers it for the
+     * next load. The activity reloads afterwards; the document-start script is
+     * registered once per origin, so localStorage is what carries the value.
+     */
+    fun setUiScale(scale: Float) {
+        val next = UiScale.clamp(scale)
+        if (next == uiScale) return
+        uiScale = next
+        webView?.evaluateJavascript(MobileInjection.applyScaleScript(next), null)
     }
 
     fun reconnect() {
@@ -383,7 +397,7 @@ class WebShell(
             mainFrameError = false
             listener.onLoading(0)
             if (!documentStartSupported) {
-                view.evaluateJavascript(MobileInjection.DOCUMENT_START_SCRIPT, null)
+                view.evaluateJavascript(MobileInjection.documentStartScript(uiScale), null)
             }
         }
 
@@ -395,7 +409,11 @@ class WebShell(
         override fun onPageFinished(view: WebView, url: String?) {
             if (mainFrameError) return
             if (!documentStartSupported) {
-                view.evaluateJavascript(MobileInjection.DOCUMENT_START_SCRIPT, null)
+                view.evaluateJavascript(MobileInjection.documentStartScript(uiScale), null)
+            } else {
+                // Re-assert the selected size in case the document-start script
+                // was registered with an older value on this origin.
+                view.evaluateJavascript(MobileInjection.applyScaleScript(uiScale), null)
             }
             view.evaluateJavascript(MobileInjection.LOGIN_CHECK_JS) { result ->
                 if (destroyed || mainFrameError) return@evaluateJavascript

@@ -1,11 +1,54 @@
 # CodeBuddy Mobile — Implementation Report
 
 Package: `com.flux.codebuddy` (debug: `com.flux.codebuddy.debug`)
-Version: 1.0.2 (versionCode 3)
+Version: 1.0.3 (versionCode 4)
 Repository: https://github.com/HakaI963/CodeBuddyAndroid
 Releases: https://github.com/HakaI963/CodeBuddyAndroid/releases
 
-## 0. Fixes in 1.0.2
+## 0. Changes in 1.0.3
+
+The 1.0.2 layout was still too large for the reporter, and one fixed size cannot
+fit both a 5" phone and a tablet. The UI size is now user-selectable.
+
+- **Settings -> UI size** slider with seven presets: 1.00x (the 1.0.2 layout),
+  0.80, 0.60 (new default), 0.45, 0.30, 0.22 and 0.17x. 0.17x is 5.9x smaller than
+  1.00x, satisfying the 5-6x minimum. The value is stored in `SharedPreferences`
+  (`ui_scale`), so it survives restarts.
+- **Reflow, not stretch.** The document-start script rewrites the viewport to
+  `width = round(760 / scale)` with `initial-scale = (screenWidth / 760) * scale`.
+  The web app therefore lays out at the wider size and is zoomed out; CSS `zoom`
+  was measured to shrink the height without reflowing and was rejected.
+  `minimum-scale=0.05` is required: with `width` alone Chrome clamped the page
+  scale to 0.25 and `innerWidth` stopped at 3376 instead of 4750.
+- **Applied live and across reloads.** Changing the slider calls
+  `__cbmApplyScale()` on the loaded page and writes `localStorage['cbm-ui-scale']`;
+  the page is then reloaded in place (same conversation URL, not the server root).
+  The document-start script is registered once per origin, so localStorage is what
+  carries the value into later loads.
+- **Readability fixes.** `text-size-adjust:100%` stops Blink text autosizing, and
+  `--conversation-content-max-width:100%` removes the 880px cap that otherwise
+  leaves the chat/composer in a narrow column on a wide scaled viewport.
+- The phone-only viewport guard was removed: the scale now applies on tablets too,
+  where 1.00x used to zoom 760px into e.g. 1280px (1.68x, i.e. very large).
+
+Measured in Chromium at 844x390 CSS px with the generated script (deviceScaleFactor
+2, isMobile):
+
+| preset | layout viewport | page scale | root font | header | composer | apparent text |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1.00x | 760x352 | 1.111 | 12px | 44px | 86px | 13.3px |
+| 0.60x | 1267x586 | 0.666 | 12px | 44px | 86px | 8.0px |
+| 0.17x | 4471x2066 | 0.189 | 12px | 44px | 86px | 2.3px |
+
+"Apparent text" is `12 CSS px * page scale`, so 0.60x is 1.67x smaller than 1.00x
+and 0.17x is 5.9x smaller. The 0.60x and 0.17x rows use the SPA's desktop layout
+(viewport >= 768px), which is the only way to fill the screen at those scales; the
+compact rules are attached to `html.cbm-compact` (device short side <= 560px)
+instead of a viewport media query, so they keep matching when the layout viewport
+grows. Switching 0.60 -> 0.17 -> 0.60 produced no JavaScript errors, and the value
+survived a reload each time.
+
+## 0.1 Fixes in 1.0.2
 
 The web UI was rendering its **desktop** layout inside the phone. At 844x390 CSS px
 the SPA keeps a 360px session panel and a 56px rail open, leaving roughly half the
@@ -23,7 +66,7 @@ width for chat, and its default type scale filled most of the 390px height.
 Measured at 844x390 with the new layer: layout viewport 760x352 at 1.11x zoom,
 header 44px, composer 86px, chat column 760px wide (was 428px).
 
-## 0.1 Fixes in 1.0.1
+## 0.2 Fixes in 1.0.1
 
 Two problems caused the app to sit on "Connecting to CodeBuddy…" forever:
 
@@ -84,14 +127,19 @@ Key findings that shaped the design:
 
 ## 3. Mobile adaptations
 
-Phone-sized screens get the web UI's mobile layout (viewport narrowed to 760px:
-full-width chat, drawer sidebar). CSS is scoped to
-`@media (orientation:landscape) and (max-height:560px)`, so tablets and desktop
-browsers are untouched:
+The viewport is rewritten to `width = 760 / scale` at the matching zoom, so the
+web app reflows at every preset. At 1.00x that is the phone layout (760px:
+full-width chat, drawer sidebar); below 1.00x the layout viewport passes 767px and
+the SPA switches to its desktop layout, which is what fills the screen when zoomed
+out. The compact CSS is attached to `html.cbm-compact`, set when the device's short
+screen side is <= 560px, so it keeps matching after the layout viewport grows and
+tablets are untouched:
 
 - 12px root font, so rem-based spacing and type shrink by ~25%;
 - header 44px, composer ~86px (22px chips, 12px input, 24px toolbar), 24px send;
-- login page fits a 351px-tall viewport; only the first hint line is shown.
+- login page fits a 351px-tall viewport; only the first hint line is shown;
+- `text-size-adjust:100%` disables Blink text autosizing;
+- `--conversation-content-max-width:100%` removes the 880px chat cap.
 
 Android-side: cutout padding on the short edges, IME insets applied as bottom
 padding, immersive mode restored after the keyboard closes, focus changes,

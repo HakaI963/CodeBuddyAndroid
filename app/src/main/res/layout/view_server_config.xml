@@ -213,6 +213,58 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="7dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/ui_scale_label"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="@dimen/text_label" />
+
+                        <Space
+                            android:layout_width="0dp"
+                            android:layout_height="1dp"
+                            android:layout_weight="1" />
+
+                        <TextView
+                            android:id="@+id/scaleValue"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:fontFamily="monospace"
+                            android:textColor="@color/accent"
+                            android:textSize="@dimen/text_label" />
+                    </LinearLayout>
+
+                    <SeekBar
+                        android:id="@+id/scaleSeek"
+                        android:layout_width="match_parent"
+                        android:layout_height="32dp"
+                        android:max="6"
+                        android:minHeight="0dp"
+                        android:paddingStart="0dp"
+                        android:paddingEnd="0dp"
+                        android:progress="2"
+                        android:progressBackgroundTint="@color/border"
+                        android:progressTint="@color/accent"
+                        android:splitTrack="false"
+                        android:thumbTint="@color/accent" />
+
+                    <TextView
+                        android:id="@+id/scaleHint"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:lineSpacingExtra="1dp"
+                        android:text="@string/ui_scale_hint"
+                        android:textColor="@color/text_tertiary"
+                        android:textSize="@dimen/text_hint"
+                        tools:ignore="SmallSp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:gravity="center_vertical"
                         android:orientation="horizontal">

@@ -38,6 +38,7 @@ class MainActivity : ComponentActivity(), WebShellListener {
     private var currentTarget: ServerTarget? = null
     private var currentConfig: ServerConfig? = null
     private var configView: ServerConfigView? = null
+    private var appliedScale = UiScale.DEFAULT
 
     private var setupMode = false
     private var connectionState = ConnectionState.IDLE
@@ -71,6 +72,8 @@ class MainActivity : ComponentActivity(), WebShellListener {
         setupWindow()
         setupInsets()
         webShell = WebShell(this, binding.webContainer, binding.webView, this)
+        appliedScale = store.loadScale()
+        webShell.uiScale = appliedScale
         setupToolbar()
         setupBack()
         registerNetworkCallback()
@@ -253,7 +256,7 @@ class MainActivity : ComponentActivity(), WebShellListener {
             configView = created
         }
 
-        view.bind(config, isSetup)
+        view.bind(config, isSetup, appliedScale)
         if (isSetup) {
             view.setStatus(getString(R.string.setup_status_idle), R.color.text_secondary)
             binding.configContainer.post { view.focusUrl() }
@@ -264,7 +267,7 @@ class MainActivity : ComponentActivity(), WebShellListener {
         binding.configContainer.visibility = View.VISIBLE
     }
 
-    private fun handleConnect(url: String, name: String, remember: Boolean) {
+    private fun handleConnect(url: String, name: String, remember: Boolean, scale: Float) {
         val view = configView ?: return
         when (val result = ServerUrl.parse(url)) {
             is UrlResult.Error -> view.showUrlError(messageFor(result.reason))
@@ -275,7 +278,16 @@ class MainActivity : ComponentActivity(), WebShellListener {
                     displayName = name.trim().take(40),
                     remember = remember,
                 )
+                val nextScale = UiScale.clamp(scale)
+                val scaleChanged = nextScale != appliedScale
                 store.save(config)
+                store.saveScale(nextScale)
+                if (scaleChanged) {
+                    appliedScale = nextScale
+                    // Apply to the loaded document before it is replaced, so
+                    // localStorage carries the value into the next load.
+                    webShell.setUiScale(nextScale)
+                }
 
                 val previous = currentTarget
                 currentConfig = config
@@ -289,15 +301,23 @@ class MainActivity : ComponentActivity(), WebShellListener {
                     previous.origin != result.target.origin ||
                     previous.startUrl != result.target.startUrl
                 val needsReload = changed ||
+                    scaleChanged ||
                     webShell.currentUrl() == null ||
                     binding.errorOverlay.visibility == View.VISIBLE ||
                     connectionState == ConnectionState.ERROR
 
                 if (needsReload) {
+                    // A size-only change reloads the open conversation instead
+                    // of jumping back to the server root.
+                    val resumeUrl = if (changed) {
+                        result.target.startUrl
+                    } else {
+                        webShell.currentUrl() ?: result.target.startUrl
+                    }
                     connectCurrent(
                         config = config,
                         target = result.target,
-                        url = result.target.startUrl,
+                        url = resumeUrl,
                         fullScreenLoading = !contentLoadedOnce ||
                             previous == null ||
                             previous.origin != result.target.origin,

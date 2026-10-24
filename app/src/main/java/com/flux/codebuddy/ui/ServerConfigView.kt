@@ -5,12 +5,15 @@ import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.SeekBar
 import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.core.content.ContextCompat
 import androidx.core.widget.doAfterTextChanged
 import com.flux.codebuddy.R
 import com.flux.codebuddy.ServerConfig
+import com.flux.codebuddy.UiScale
+import java.util.Locale
 
 /**
  * Compact two-column server form used both as the first-run screen and as the
@@ -27,13 +30,17 @@ class ServerConfigView(private val activity: ComponentActivity) {
     private val urlInput: EditText = root.findViewById(R.id.urlInput)
     private val nameInput: EditText = root.findViewById(R.id.nameInput)
     private val rememberCheck: CheckBox = root.findViewById(R.id.rememberCheck)
+    private val scaleSeek: SeekBar = root.findViewById(R.id.scaleSeek)
+    private val scaleValue: TextView = root.findViewById(R.id.scaleValue)
     private val urlError: TextView = root.findViewById(R.id.urlError)
     private val testStatus: TextView = root.findViewById(R.id.testStatus)
     private val btnTest: Button = root.findViewById(R.id.btnTest)
     private val btnConnect: Button = root.findViewById(R.id.btnConnect)
     private val btnCancel: Button = root.findViewById(R.id.btnCancel)
 
-    var onConnect: ((url: String, name: String, remember: Boolean) -> Unit)? = null
+    private var scale: Float = UiScale.DEFAULT
+
+    var onConnect: ((url: String, name: String, remember: Boolean, scale: Float) -> Unit)? = null
     var onTest: ((url: String) -> Unit)? = null
     var onCancel: (() -> Unit)? = null
 
@@ -43,8 +50,19 @@ class ServerConfigView(private val activity: ComponentActivity) {
                 urlInput.text.toString(),
                 nameInput.text.toString(),
                 rememberCheck.isChecked,
+                scale,
             )
         }
+        scaleSeek.max = UiScale.STEPS.size - 1
+        scaleSeek.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(bar: SeekBar?, progress: Int, fromUser: Boolean) {
+                scale = UiScale.STEPS[progress.coerceIn(0, UiScale.STEPS.size - 1)]
+                renderScale()
+            }
+
+            override fun onStartTrackingTouch(bar: SeekBar?) = Unit
+            override fun onStopTrackingTouch(bar: SeekBar?) = Unit
+        })
         btnTest.setOnClickListener {
             onTest?.invoke(urlInput.text.toString())
         }
@@ -70,7 +88,7 @@ class ServerConfigView(private val activity: ComponentActivity) {
         }
     }
 
-    fun bind(config: ServerConfig?, isSetup: Boolean) {
+    fun bind(config: ServerConfig?, isSetup: Boolean, uiScale: Float) {
         title.setText(if (isSetup) R.string.setup_title else R.string.settings_title)
         subtitle.setText(if (isSetup) R.string.setup_subtitle else R.string.settings_subtitle)
         btnCancel.visibility = if (isSetup) View.GONE else View.VISIBLE
@@ -78,11 +96,27 @@ class ServerConfigView(private val activity: ComponentActivity) {
         urlInput.setText(config?.url.orEmpty())
         nameInput.setText(config?.displayName.orEmpty())
         rememberCheck.isChecked = config?.remember ?: true
+        scale = UiScale.nearest(uiScale)
+        scaleSeek.progress = UiScale.indexOf(scale)
+        renderScale()
         clearUrlError()
         clearTestStatus()
         setBusy(false)
         if (isSetup) {
             setStatus(activity.getString(R.string.setup_status_idle), R.color.text_secondary)
+        }
+    }
+
+    private fun renderScale() {
+        val value = String.format(Locale.US, "%.2f", scale)
+        scaleValue.text = if (scale >= UiScale.MAX) {
+            activity.getString(R.string.ui_scale_largest, value)
+        } else {
+            activity.getString(
+                R.string.ui_scale_value,
+                value,
+                String.format(Locale.US, "%.1f", 1f / scale),
+            )
         }
     }
 
@@ -129,6 +163,7 @@ class ServerConfigView(private val activity: ComponentActivity) {
         urlInput.isEnabled = !busy
         nameInput.isEnabled = !busy
         rememberCheck.isEnabled = !busy
+        scaleSeek.isEnabled = !busy
         if (busy) {
             showTestStatus(activity.getString(R.string.test_testing), R.color.warning)
         }

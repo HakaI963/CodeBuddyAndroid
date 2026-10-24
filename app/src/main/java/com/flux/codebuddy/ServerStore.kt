@@ -22,6 +22,13 @@ class ServerStore(context: Context) {
         )
     }
 
+    /** UI size is a display preference, independent of the remembered server. */
+    fun loadScale(): Float = prefs.getFloat(KEY_UI_SCALE, UiScale.DEFAULT)
+
+    fun saveScale(scale: Float) {
+        prefs.edit().putFloat(KEY_UI_SCALE, UiScale.clamp(scale)).apply()
+    }
+
     fun save(config: ServerConfig) {
         prefs.edit().apply {
             if (config.remember) {
@@ -41,5 +48,6 @@ class ServerStore(context: Context) {
         const val KEY_URL = "server_url"
         const val KEY_NAME = "display_name"
         const val KEY_REMEMBER = "remember_server"
+        const val KEY_UI_SCALE = "ui_scale"
     }
 }
