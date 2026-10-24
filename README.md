@@ -8,7 +8,7 @@ persistent server configuration, and a reachability check.
 
 Package: `com.flux.codebuddy`  
 App name: **CodeBuddy Mobile**  
-Version: 1.0.0 (versionCode 1)
+Version: 1.0.2 (versionCode 3)
 
 ## What this is
 
@@ -155,10 +155,13 @@ replace it. It makes four reversible client-side changes:
 2. Seeds the existing sidebar as collapsed with a 240 px width on first run
    (`codebuddy-sidebar`), only if no preference exists. The toolbar panel button
    toggles the web UI's own sidebar.
-3. Adds CSS scoped to `(orientation:landscape) and (max-height:520px)` that compacts
-   the existing header (56 -> 40 px), composer (134 -> 108 px), and login page.
-   Tablets are untouched.
-4. Uses the existing login page, chat composer, message list and tool panes as-is.
+3. Forces the web UI's own phone layout on phone-sized screens: the viewport is
+   narrowed to `width=760`, so the SPA drops its permanent 360 px session panel and
+   uses the full-width chat layout with a drawer sidebar. Without this, the desktop
+   layout at 844 px leaves only ~428 px for the chat.
+4. Adds CSS scoped to `(orientation:landscape) and (max-height:560px)` that sets a
+   12 px root font, a 44 px header, an ~86 px composer and a login page that fits a
+   short viewport. Tablets (>1000 px) keep the desktop layout and are untouched.
 
 No server files are modified. Removing `MobileInjection` restores the stock UI.
 

@@ -1,11 +1,29 @@
 # CodeBuddy Mobile — Implementation Report
 
 Package: `com.flux.codebuddy` (debug: `com.flux.codebuddy.debug`)
-Version: 1.0.1 (versionCode 2)
+Version: 1.0.2 (versionCode 3)
 Repository: https://github.com/HakaI963/CodeBuddyAndroid
 Releases: https://github.com/HakaI963/CodeBuddyAndroid/releases
 
-## 0. Fixes in 1.0.1
+## 0. Fixes in 1.0.2
+
+The web UI was rendering its **desktop** layout inside the phone. At 844x390 CSS px
+the SPA keeps a 360px session panel and a 56px rail open, leaving roughly half the
+width for chat, and its default type scale filled most of the 390px height.
+
+- The WebView now honours the page viewport (`useWideViewPort` /
+  `loadWithOverviewMode`) and the document-start script narrows it to `width=760`
+  on phone-sized screens only (`max(screen.width, screen.height) <= 1000`). That
+  switches the SPA to its own mobile layout: full-width chat, drawer sidebar, no
+  permanent session panel. Tablets keep the desktop layout.
+- The compact layer now sets a 12px root font (rem-based spacing/typography shrinks
+  ~25%), a 44px header, an ~86px composer (22px context chips, 12px input, 24px
+  toolbar) and a login page that fits a 351px-tall viewport without clipping.
+
+Measured at 844x390 with the new layer: layout viewport 760x352 at 1.11x zoom,
+header 44px, composer 86px, chat column 760px wide (was 428px).
+
+## 0.1 Fixes in 1.0.1
 
 Two problems caused the app to sit on "Connecting to CodeBuddy…" forever:
 
@@ -66,12 +84,14 @@ Key findings that shaped the design:
 
 ## 3. Mobile adaptations
 
-Scoped to `@media (orientation:landscape) and (max-height:520px)`, so tablets and
-desktop browsers are untouched:
+Phone-sized screens get the web UI's mobile layout (viewport narrowed to 760px:
+full-width chat, drawer sidebar). CSS is scoped to
+`@media (orientation:landscape) and (max-height:560px)`, so tablets and desktop
+browsers are untouched:
 
-- status/header 56px → 40px, composer 134px → 108px, composer toolbar 44px → 32px;
-- compact chips/send button (32px), tighter textarea padding, 13px message text;
-- login page made scrollable and compact so the form fits a 320px-tall viewport.
+- 12px root font, so rem-based spacing and type shrink by ~25%;
+- header 44px, composer ~86px (22px chips, 12px input, 24px toolbar), 24px send;
+- login page fits a 351px-tall viewport; only the first hint line is shown.
 
 Android-side: cutout padding on the short edges, IME insets applied as bottom
 padding, immersive mode restored after the keyboard closes, focus changes,
@@ -100,8 +120,8 @@ The build host is aarch64 and has no `/dev/kvm`; Google Maven publishes no
 therefore compiled by GitHub Actions on `ubuntu-latest`, which also matches the
 requested workflow.
 
-Workflow run [`40106469461`](https://github.com/HakaI963/CodeBuddyAndroid/actions/runs/40106469461)
-(commit `c876d7c`) completed green:
+Workflow run [`40110418104`](https://github.com/HakaI963/CodeBuddyAndroid/actions/runs/40110418104)
+(commit `1fe4b51`) completed green:
 
 ```
 ./gradlew --no-daemon --stacktrace testDebugUnitTest lintDebug assembleDebug assembleRelease
@@ -134,7 +154,7 @@ API 26+. `v1` is unnecessary and `v3` requires `minSdk >= 28`.)
 `aapt2 dump badging` on the release APK:
 
 ```
-package: name='com.flux.codebuddy' versionCode='2' versionName='1.0.1' compileSdkVersion='35'
+package: name='com.flux.codebuddy' versionCode='3' versionName='1.0.2' compileSdkVersion='35'
 minSdkVersion:'26'
 targetSdkVersion:'35'
 uses-permission: name='android.permission.INTERNET'
@@ -148,8 +168,8 @@ launchable-activity: name='com.flux.codebuddy.MainActivity'
 
 | Artifact | Bytes | Size |
 | --- | ---: | ---: |
-| `CodeBuddyMobile-release.apk` | 167,788 | 164 KiB |
-| `CodeBuddyMobile-debug.apk` | 2,644,382 | 2.5 MiB |
+| `CodeBuddyMobile-release.apk` | 168,264 | 164 KiB |
+| `CodeBuddyMobile-debug.apk` | 2,644,886 | 2.5 MiB |
 
 The release APK contains a ~218 KB `classes.dex`, a ~22 KB `resources.arsc`, and
 obfuscated resources; `MainActivity` and
