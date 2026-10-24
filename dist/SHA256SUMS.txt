@@ -1,2 +1,2 @@
-1104b72cb16825d98b4433978d820da20b108f070c13d1d2105b817ac866b684  ./CodeBuddyMobile-1.0.0-debug.apk
-71b629189cfe3da2d2fdef4282259b3bef55dbc005e6a1bbab41614b22ad8c0d  ./CodeBuddyMobile-1.0.0-release.apk
+0c07cecfcd9b02af8f0ae00d2c3f787fd434af03fbfc9ab703cfe568625c5ac2  ./CodeBuddyMobile-1.0.0-debug.apk
+1f0654e76d5385efd8c6c46e9da420afd5df310d613e1d759033a9225a126fb5  ./CodeBuddyMobile-1.0.0-release.apk

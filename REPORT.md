@@ -143,6 +143,13 @@ that builds the APKs, so they always match the published files. (The build is no
 byte-reproducible: `META-INF/version-control-info.textproto` embeds commit data, so
 each run produces different bytes.)
 
+Checksums of the assets attached to the `v1.0.0` release (verified after download):
+
+```
+0c07cecfcd9b02af8f0ae00d2c3f787fd434af03fbfc9ab703cfe568625c5ac2  CodeBuddyMobile-1.0.0-debug.apk
+1f0654e76d5385efd8c6c46e9da420afd5df310d613e1d759033a9225a126fb5  CodeBuddyMobile-1.0.0-release.apk
+```
+
 ## 6. Tests that were NOT run
 
 - **No emulator or physical-device run.** This host has no `/dev/kvm` and no
