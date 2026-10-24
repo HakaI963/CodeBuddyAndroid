@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!--
+      CodeBuddy is normally reached at http://<private-lan-ip>:7890. Android's
+      network security config cannot express "private IP ranges only", so
+      cleartext is enabled at the platform level and the application enforces
+      the policy in ServerUrl.kt: HTTP is accepted only for loopback, RFC1918,
+      link-local, CGNAT, IPv6 ULA/link-local and .local/.lan/.home/.internal
+      hosts. Public hosts must use HTTPS.
+
+      Certificate validation is never bypassed. Only system trust anchors are
+      trusted; self-signed certificates are rejected.
+    -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

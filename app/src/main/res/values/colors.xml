@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg">#FF000000</color>
+    <color name="toolbar">#FF121314</color>
+    <color name="surface">#FF141517</color>
+    <color name="surface_alt">#FF1F2022</color>
+    <color name="surface_input">#FF0B0C0D</color>
+    <color name="border">#FF2E2E33</color>
+    <color name="border_input">#FF3A3A40</color>
+    <color name="text">#FFE5E5E5</color>
+    <color name="text_secondary">#FFA3A3A3</color>
+    <color name="text_tertiary">#FF7C7C82</color>
+    <color name="accent">#FF00BC90</color>
+    <color name="accent_pressed">#FF00A37D</color>
+    <color name="accent_dim">#3300BC90</color>
+    <color name="on_accent">#FF04120D</color>
+    <color name="error">#FFFF6B6B</color>
+    <color name="warning">#FFF5B544</color>
+    <color name="success">#FF2ECC8F</color>
+    <color name="scrim">#E6000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
+    <color name="ic_launcher_bg">#FF0B0F14</color>
+</resources>

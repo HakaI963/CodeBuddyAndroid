@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CodeBuddy Mobile</string>
+
+    <!-- Toolbar -->
+    <string name="toolbar_title">CodeBuddy</string>
+    <string name="toolbar_status_idle">Not connected</string>
+    <string name="toolbar_status_connecting">Connecting…</string>
+    <string name="toolbar_status_connected">Connected</string>
+    <string name="toolbar_status_login">Login required</string>
+    <string name="toolbar_status_error">Connection failed</string>
+    <string name="toolbar_status_offline">Offline</string>
+    <string name="action_sidebar">Toggle session sidebar</string>
+    <string name="action_reload">Reload</string>
+    <string name="action_settings">Server settings</string>
+    <string name="action_close">Close</string>
+
+    <!-- Setup / settings -->
+    <string name="setup_title">Connect to CodeBuddy</string>
+    <string name="setup_subtitle">Point the app at your CodeBuddy Code server. The app is a thin shell around the existing web UI; nothing is proxied.</string>
+    <string name="settings_title">Server settings</string>
+    <string name="settings_subtitle">Changing the server reloads the chat. Sessions stay on the server.</string>
+    <string name="server_url_label">Server URL</string>
+    <string name="server_url_hint">http://192.168.1.100:7890</string>
+    <string name="display_name_label">Display name (optional)</string>
+    <string name="display_name_hint">Home desktop</string>
+    <string name="remember_server">Remember this server</string>
+    <string name="test_connection">Test connection</string>
+    <string name="test_connection_short">Test</string>
+    <string name="connect">Connect</string>
+    <string name="save_and_connect">Save &amp; connect</string>
+    <string name="cancel">Cancel</string>
+    <string name="setup_lan_hint">LAN: use the Linux machine IP and port, for example http://192.168.1.100:7890. Start CodeBuddy with --host 0.0.0.0.</string>
+    <string name="setup_remote_hint">Remote: use an HTTPS reverse proxy or a VPN. Never expose port 7890 directly to the internet.</string>
+    <string name="setup_security_hint">HTTP is accepted only for private/LAN addresses. Certificate validation is never bypassed.</string>
+    <string name="setup_status_idle">Enter the server address to begin.</string>
+    <string name="test_hint">The test checks reachability only. It does not log in.</string>
+
+    <!-- Validation -->
+    <string name="url_required">Enter a server URL.</string>
+    <string name="url_invalid">Enter a valid http:// or https:// URL.</string>
+    <string name="url_credentials">Remove the username or password from the URL.</string>
+    <string name="url_password_query">Do not put a password in the URL. Log in inside the app.</string>
+    <string name="url_public_http">Use HTTPS for servers outside your local network.</string>
+    <string name="url_bad_path">The URL path contains invalid characters.</string>
+    <string name="url_bad_port">The port must be between 1 and 65535.</string>
+
+    <!-- Probe -->
+    <string name="test_testing">Testing connection…</string>
+    <string name="test_ok">Server reachable. You can connect now.</string>
+    <string name="test_auth">Server reachable. Login is required.</string>
+    <string name="test_failed">Connection test failed: %1$s</string>
+    <string name="probe_not_codebuddy">The server responded, but it does not look like CodeBuddy Code.</string>
+    <string name="probe_http">The server responded with HTTP %1$d.</string>
+    <string name="probe_timeout">Timed out. Check the IP address, port, and firewall.</string>
+    <string name="probe_refused">Connection refused. Start CodeBuddy with --host 0.0.0.0 and allow the port through the firewall.</string>
+    <string name="probe_unknown_host">Server address not found. Check the URL.</string>
+    <string name="probe_tls">The TLS certificate is not trusted. Use a valid certificate or a private network.</string>
+    <string name="probe_no_network">No network connection.</string>
+    <string name="probe_generic">Could not reach the server.</string>
+
+    <!-- Errors -->
+    <string name="error_title">Cannot reach CodeBuddy</string>
+    <string name="error_retry">Retry</string>
+    <string name="error_settings">Settings</string>
+    <string name="error_offline">No network connection. Reconnect Wi-Fi, then retry.</string>
+    <string name="error_generic">The page could not be loaded.</string>
+    <string name="error_ssl">The server TLS certificate is not trusted. Use a valid certificate or connect through a private network.</string>
+    <string name="error_http">The server responded with HTTP %1$d. Check the URL and the server logs.</string>
+    <string name="error_not_found">The server responded, but the path was not found. Check the URL path.</string>
+    <string name="error_renderer">The web view stopped unexpectedly. Tap Retry to reload.</string>
+    <string name="error_timeout">Timed out. Check the IP address, port, and firewall.</string>
+    <string name="error_refused">Connection refused. Start CodeBuddy with --host 0.0.0.0 and allow the port through the firewall.</string>
+    <string name="error_unknown_host">Server address not found. Check the URL.</string>
+    <string name="error_host_lookup">Server address not found. Check the URL and that the device is on the same network.</string>
+
+    <!-- Web shell -->
+    <string name="loading">Connecting to CodeBuddy…</string>
+    <string name="sidebar_unavailable">Use the panel button in the chat header.</string>
+    <string name="double_back_exit">Press Back again to exit</string>
+    <string name="download_started">Download started</string>
+    <string name="download_unsupported">This download type is not supported by the Android web view. Use the desktop UI for blob downloads.</string>
+    <string name="download_permission">Storage permission is needed to save this file.</string>
+    <string name="download_failed">Could not start the download.</string>
+    <string name="file_chooser_unavailable">No file picker is available.</string>
+    <string name="external_link_error">No app can open this link.</string>
+    <string name="js_dialog_title">CodeBuddy</string>
+    <string name="js_confirm_ok">OK</string>
+    <string name="js_confirm_cancel">Cancel</string>
+    <string name="leave_page_title">Leave this page?</string>
+    <string name="leave_page_message">Changes you made may not be saved.</string>
+    <string name="leave_page_stay">Stay</string>
+    <string name="leave_page_leave">Leave</string>
+    <string name="server_status_format">%1$s · %2$s</string>
+</resources>
