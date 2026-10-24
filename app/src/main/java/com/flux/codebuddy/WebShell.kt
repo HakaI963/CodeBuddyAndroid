@@ -76,7 +76,7 @@ class WebShell(
     private var lastUrl: String? = null
     private var mainFrameError = false
     /** Selected UI size; set by the activity before [load]. */
-    var uiScale: Float = UiScale.DEFAULT
+    private var uiScale: Float = UiScale.DEFAULT
     private var documentStartSupported =
         WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)
     private val injectedOrigins = mutableSetOf<String>()
@@ -181,11 +181,13 @@ class WebShell(
      * next load. The activity reloads afterwards; the document-start script is
      * registered once per origin, so localStorage is what carries the value.
      */
-    fun setUiScale(scale: Float) {
+    fun applyUiScale(scale: Float) {
         val next = UiScale.clamp(scale)
         if (next == uiScale) return
         uiScale = next
-        webView?.evaluateJavascript(MobileInjection.applyScaleScript(next), null)
+        val view = webView ?: return
+        if (view.url == null) return
+        view.evaluateJavascript(MobileInjection.applyScaleScript(next), null)
     }
 
     fun reconnect() {

@@ -73,7 +73,7 @@ class MainActivity : ComponentActivity(), WebShellListener {
         setupInsets()
         webShell = WebShell(this, binding.webContainer, binding.webView, this)
         appliedScale = store.loadScale()
-        webShell.uiScale = appliedScale
+        webShell.applyUiScale(appliedScale)
         setupToolbar()
         setupBack()
         registerNetworkCallback()
@@ -286,7 +286,7 @@ class MainActivity : ComponentActivity(), WebShellListener {
                     appliedScale = nextScale
                     // Apply to the loaded document before it is replaced, so
                     // localStorage carries the value into the next load.
-                    webShell.setUiScale(nextScale)
+                    webShell.applyUiScale(nextScale)
                 }
 
                 val previous = currentTarget
