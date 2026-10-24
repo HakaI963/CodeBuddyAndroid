@@ -5,10 +5,13 @@ package com.flux.codebuddy
  * on the server; all rules are injected into the WebView only.
  *
  * The overrides are intentionally narrow:
- *  - force the existing dark theme (the native shell is dark)
- *  - seed the existing sidebar as collapsed on first run, at a narrow width
- *  - compact the existing header/composer and login page only on short
- *    landscape viewports (phones), never on tablets/desktops
+ *  - seed the existing theme/sidebar preferences on first run
+ *  - force the web UI's own phone layout: on a phone-sized screen the desktop
+ *    layout keeps a 360px session panel and leaves ~half the width for chat,
+ *    so the viewport is narrowed to 760px, which switches the SPA to its
+ *    mobile layout (full-width chat, drawer sidebar) at a ~1.1x zoom
+ *  - shrink the type/spacing scale and compact the header, composer and login
+ *    page on short landscape viewports, never on tablets/desktops
  *
  * If a future CodeBuddy release renames these classes the rules simply stop
  * applying; the web UI remains fully functional.
@@ -16,30 +19,55 @@ package com.flux.codebuddy
 object MobileInjection {
 
     private val CSS = """
-        @media (orientation:landscape) and (max-height:520px){
-          .app-status-bar{height:40px!important;min-height:40px!important;padding:0 10px!important;}
-          .app-status-bar span.font-medium{font-size:12px!important;line-height:14px!important;}
-          .composer-stack{padding:0 8px 8px!important;}
-          .composer-card{gap:4px!important;padding-top:6px!important;border-radius:14px!important;}
-          .composer-context-row{min-height:22px!important;padding:0 6px!important;}
-          .composer-textarea{padding:2px 10px 0 12px!important;font-size:13px!important;}
-          .composer-toolbar{height:32px!important;min-height:32px!important;}
-          .composer-chip,.composer-add,.composer-send{height:32px!important;min-height:32px!important;}
-          .composer-send{width:32px!important;}
-          .login-page{overflow-y:auto!important;align-items:flex-start!important;padding:8px 0 26px!important;}
-          .login-content{gap:6px!important;padding:6px 0!important;}
-          .login-logo.login-logo-pixel{width:56px!important;height:40px!important;}
-          .login-title{font-size:17px!important;line-height:21px!important;}
-          .login-tagline{font-size:11px!important;line-height:15px!important;}
-          .login-hints{font-size:9px!important;line-height:1.3!important;max-height:78px!important;overflow-y:auto!important;margin-top:4px!important;}
-          .login-hints p{margin:2px 0!important;}
-          .login-footer{bottom:4px!important;}
-          .login-footer a{font-size:10px!important;line-height:14px!important;}
+        @media (orientation:landscape) and (max-height:560px){
+          html{font-size:12px!important;}
+          .app-status-bar{height:44px!important;min-height:44px!important;padding:2px 8px!important;}
+          .app-status-bar button{height:26px!important;width:26px!important;}
+          .composer-stack{padding:0 6px 6px!important;}
+          .composer-card{gap:2px!important;padding-top:3px!important;border-radius:12px!important;}
+          .composer-context-row{min-height:22px!important;padding:0 4px!important;}
+          .composer-seat-chip{height:22px!important;min-height:22px!important;font-size:11px!important;padding:0 6px!important;}
+          .composer-textarea{padding:0 8px!important;font-size:12px!important;min-height:18px!important;}
+          .composer-toolbar{height:24px!important;min-height:24px!important;padding:0 6px 2px!important;}
+          .composer-add,.composer-send{height:24px!important;min-height:24px!important;}
+          .composer-send{width:24px!important;}
+          .login-page{overflow:hidden!important;justify-content:flex-start!important;padding:4px 0 18px!important;}
+          .login-content{gap:3px!important;padding:2px 0!important;}
+          .login-logo.login-logo-pixel{width:40px!important;height:28px!important;}
+          .login-title{font-size:15px!important;line-height:18px!important;}
+          .login-tagline{font-size:10px!important;line-height:13px!important;}
+          .login-hints{font-size:9px!important;line-height:1.25!important;margin-top:2px!important;}
+          .login-hints p:not(:first-child){display:none!important;}
+          .login-footer{position:absolute!important;bottom:2px!important;}
+          .login-footer a{font-size:9px!important;line-height:12px!important;}
         }
     """.trimIndent()
 
     val DOCUMENT_START_SCRIPT: String = """
         (function(){
+          // Phones only: switch the SPA to its mobile layout. The desktop layout
+          // keeps a 360px session panel open, which leaves too little room for
+          // chat on a landscape phone.
+          (function(){
+            var forced=false;
+            function fixViewport(){
+              try{
+                var m=document.querySelector('meta[name="viewport"]');
+                if(!m)return;
+                if(!forced){
+                  var device=Math.max(screen.width||0,screen.height||0);
+                  if(device>1000||device<=767)return;
+                  forced=true;
+                }
+                if(m.getAttribute('content')!=='width=760')m.setAttribute('content','width=760');
+              }catch(e){}
+            }
+            fixViewport();
+            document.addEventListener('DOMContentLoaded',fixViewport);
+            window.addEventListener('load',fixViewport);
+            var n=0,t=setInterval(function(){fixViewport();if(++n>60)clearInterval(t);},16);
+            try{new MutationObserver(fixViewport).observe(document.documentElement,{childList:true,subtree:true});}catch(e){}
+          })();
           try {
             localStorage.setItem('codebuddy-theme', JSON.stringify({mode:'dark'}));
             if (!localStorage.getItem('codebuddy-sidebar')) {

@@ -126,6 +126,10 @@ class WebShell(
             cacheMode = WebSettings.LOAD_DEFAULT
             setGeolocationEnabled(false)
             setSupportMultipleWindows(false)
+            // Honour the page's viewport meta so the injected mobile-layout
+            // override (width=760) can take effect.
+            useWideViewPort = true
+            loadWithOverviewMode = true
             textZoom = 100
             safeBrowsingEnabled = true
         }
