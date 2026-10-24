@@ -23,5 +23,11 @@ object UiScale {
         return STEPS.minByOrNull { kotlin.math.abs(it - target) } ?: DEFAULT
     }
 
-    fun indexOf(value: Float): Int = STEPS.indexOf(nearest(value))
+    fun indexOf(value: Float): Int {
+        val target = nearest(value)
+        for (i in STEPS.indices) {
+            if (STEPS[i] == target) return i
+        }
+        return 0
+    }
 }
