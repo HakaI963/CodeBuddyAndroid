@@ -17,6 +17,16 @@
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowContentTransitions">false</item>
         <item name="android:windowActivityTransitions">false</item>
-        <item name="android:windowDisablePreview">false</item>
+        <item name="android:alertDialogTheme">@style/Theme.CodeBuddy.Dialog</item>
+    </style>
+
+    <!-- Native dialogs (JS prompts, overflow sheet, confirmations) on the app's
+         own dark surface instead of the platform light dialog. -->
+    <style name="Theme.CodeBuddy.Dialog" parent="@android:style/Theme.Material.Dialog.Alert">
+        <item name="android:colorAccent">@color/accent</item>
+        <item name="android:textColorPrimary">@color/text</item>
+        <item name="android:textColorSecondary">@color/text_secondary</item>
+        <item name="android:windowBackground">@drawable/bg_dialog</item>
+        <item name="android:backgroundDimAmount">0.6</item>
     </style>
 </resources>

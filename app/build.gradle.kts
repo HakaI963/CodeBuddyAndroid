@@ -14,8 +14,8 @@ android {
         applicationId = "com.flux.codebuddy"
         minSdk = 26
         targetSdk = 35
-        versionCode = 5
-        versionName = "1.0.4"
+        versionCode = 6
+        versionName = "2.0.0"
 
         vectorDrawables.useSupportLibrary = false
     }
@@ -90,4 +90,7 @@ dependencies {
     implementation("androidx.webkit:webkit:1.12.1")
 
     testImplementation("junit:junit:4.13.2")
+    // The android.jar shipped for local unit tests contains stubbed org.json
+    // classes; the codec is pure JVM, so give the tests the real implementation.
+    testImplementation("org.json:json:20240303")
 }

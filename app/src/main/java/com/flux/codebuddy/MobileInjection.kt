@@ -6,18 +6,18 @@ import java.util.Locale
  * Client-side adaptation of the existing CodeBuddy web UI. Nothing is changed
  * on the server; all rules are injected into the WebView only.
  *
- * The overrides are intentionally narrow:
+ * The overrides are intentionally narrow, and none of them is required for the
+ * app to function - the native chrome (home, app bar, settings, recents) is
+ * built from Android views and does not depend on the page's DOM:
  *  - seed the existing theme/sidebar preferences on first run
  *  - scale the whole UI by widening the layout viewport and zooming out, which
- *    makes the web app reflow (a CSS transform/zoom would not). The scale is
- *    user-selectable; 1.00 keeps the 1.0.2 mobile layout, 0.17 is ~5.9x smaller
- *    and switches the app to its desktop layout because the viewport is wide
+ *    makes the web app reflow (a CSS transform/zoom would not)
  *  - stop Android/Chrome text autosizing so the CSS sizes are honoured
  *  - let the chat/composer use the full width instead of the 880px cap
  *  - compact the header, composer and login page on short landscape viewports
  *
  * If a future CodeBuddy release renames these classes the rules simply stop
- * applying; the web UI remains fully functional.
+ * applying; the web UI remains fully functional and the native UI is unaffected.
  */
 object MobileInjection {
 
@@ -47,6 +47,8 @@ object MobileInjection {
         .cbm-compact .login-hints p:not(:first-child){display:none!important;}
         .cbm-compact .login-footer{position:absolute!important;bottom:2px!important;}
         .cbm-compact .login-footer a{font-size:9px!important;line-height:12px!important;}
+        /* Keep the page from bouncing behind the native bars. */
+        html,body{overscroll-behavior:none!important;}
     """.trimIndent()
 
     /**
@@ -108,19 +110,24 @@ object MobileInjection {
               }
             } catch (e) {}
           }
+          var lastViewport = '';
           function fixViewport(){
             applyCompact();
             try {
               var m = document.querySelector('meta[name="viewport"]');
               if (!m) return;
               var v = viewportContent();
-              if (m.getAttribute('content') !== v) m.setAttribute('content', v);
+              if (v !== lastViewport && m.getAttribute('content') !== v) {
+                lastViewport = v;
+                m.setAttribute('content', v);
+              }
             } catch (e) {}
           }
           window.__cbmApplyScale = function(next){
             var v = parseFloat(next);
             if (!isFinite(v) || v < 0.1 || v > 1.5) return S;
             S = v;
+            lastViewport = '';
             try { localStorage.setItem('$SCALE_KEY', String(S)); } catch (e) {}
             fixViewport();
             return S;
@@ -128,8 +135,13 @@ object MobileInjection {
           fixViewport();
           document.addEventListener('DOMContentLoaded', fixViewport);
           window.addEventListener('load', fixViewport);
-          var n = 0, t = setInterval(function(){ fixViewport(); if (++n > 60) clearInterval(t); }, 16);
-          try { new MutationObserver(fixViewport).observe(document.documentElement, {childList:true, subtree:true}); } catch (e) {}
+          window.addEventListener('resize', function(){
+            lastViewport = '';
+            fixViewport();
+          });
+          // The SPA mounts late; poll briefly instead of observing the whole
+          // document (a subtree observer on this app is measurably expensive).
+          var n = 0, t = setInterval(function(){ fixViewport(); if (++n > 40) clearInterval(t); }, 60);
           try {
             localStorage.setItem('codebuddy-theme', JSON.stringify({mode:'dark'}));
             if (!localStorage.getItem('codebuddy-sidebar')) {

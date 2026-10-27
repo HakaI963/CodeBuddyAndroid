@@ -5,24 +5,30 @@ import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.FrameLayout
+import android.widget.ImageButton
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.core.content.ContextCompat
 import androidx.core.widget.doAfterTextChanged
+import com.flux.codebuddy.BuildConfig
 import com.flux.codebuddy.R
 import com.flux.codebuddy.ServerConfig
 import com.flux.codebuddy.UiScale
 import java.util.Locale
 
 /**
- * Compact two-column server form used both as the first-run screen and as the
- * settings overlay. It is intentionally built from platform widgets to keep
- * the APK small and to match the dark web UI.
+ * Server form used both as the first-run screen and as the settings sheet.
+ * Built from platform widgets so it stays small and matches the native theme.
  */
 class ServerConfigView(private val activity: ComponentActivity) {
 
-    val root: View = activity.layoutInflater.inflate(R.layout.view_server_config, null, false)
+    val root: View = activity.layoutInflater.inflate(
+        R.layout.view_server_config,
+        FrameLayout(activity),
+        false,
+    )
 
     private val title: TextView = root.findViewById(R.id.configTitle)
     private val subtitle: TextView = root.findViewById(R.id.configSubtitle)
@@ -30,6 +36,7 @@ class ServerConfigView(private val activity: ComponentActivity) {
     private val urlInput: EditText = root.findViewById(R.id.urlInput)
     private val nameInput: EditText = root.findViewById(R.id.nameInput)
     private val rememberCheck: CheckBox = root.findViewById(R.id.rememberCheck)
+    private val keepAwakeCheck: CheckBox = root.findViewById(R.id.keepAwakeCheck)
     private val scaleSeek: SeekBar = root.findViewById(R.id.scaleSeek)
     private val scaleValue: TextView = root.findViewById(R.id.scaleValue)
     private val urlError: TextView = root.findViewById(R.id.urlError)
@@ -37,12 +44,17 @@ class ServerConfigView(private val activity: ComponentActivity) {
     private val btnTest: Button = root.findViewById(R.id.btnTest)
     private val btnConnect: Button = root.findViewById(R.id.btnConnect)
     private val btnCancel: Button = root.findViewById(R.id.btnCancel)
+    private val btnClose: ImageButton = root.findViewById(R.id.btnCloseSettings)
+    private val btnClearSession: Button = root.findViewById(R.id.btnClearSession)
+    private val version: TextView = root.findViewById(R.id.settingsVersion)
 
     private var scale: Float = UiScale.DEFAULT
 
     var onConnect: ((url: String, name: String, remember: Boolean, scale: Float) -> Unit)? = null
     var onTest: ((url: String) -> Unit)? = null
     var onCancel: (() -> Unit)? = null
+    var onClearSession: (() -> Unit)? = null
+    var onKeepAwakeChanged: ((Boolean) -> Unit)? = null
 
     init {
         btnConnect.setOnClickListener {
@@ -63,11 +75,12 @@ class ServerConfigView(private val activity: ComponentActivity) {
             override fun onStartTrackingTouch(bar: SeekBar?) = Unit
             override fun onStopTrackingTouch(bar: SeekBar?) = Unit
         })
-        btnTest.setOnClickListener {
-            onTest?.invoke(urlInput.text.toString())
-        }
-        btnCancel.setOnClickListener {
-            onCancel?.invoke()
+        btnTest.setOnClickListener { onTest?.invoke(urlInput.text.toString()) }
+        btnCancel.setOnClickListener { onCancel?.invoke() }
+        btnClose.setOnClickListener { onCancel?.invoke() }
+        btnClearSession.setOnClickListener { onClearSession?.invoke() }
+        keepAwakeCheck.setOnCheckedChangeListener { _, checked ->
+            onKeepAwakeChanged?.invoke(checked)
         }
         urlInput.doAfterTextChanged { clearUrlError() }
         urlInput.setOnEditorActionListener { _, actionId, _ ->
@@ -86,16 +99,24 @@ class ServerConfigView(private val activity: ComponentActivity) {
                 false
             }
         }
+        version.text = activity.getString(
+            R.string.settings_version,
+            BuildConfig.VERSION_NAME,
+            BuildConfig.VERSION_CODE,
+        )
     }
 
-    fun bind(config: ServerConfig?, isSetup: Boolean, uiScale: Float) {
+    fun bind(config: ServerConfig?, isSetup: Boolean, uiScale: Float, keepAwake: Boolean) {
         title.setText(if (isSetup) R.string.setup_title else R.string.settings_title)
         subtitle.setText(if (isSetup) R.string.setup_subtitle else R.string.settings_subtitle)
         btnCancel.visibility = if (isSetup) View.GONE else View.VISIBLE
+        btnClose.visibility = if (isSetup) View.GONE else View.VISIBLE
         btnConnect.setText(if (isSetup) R.string.connect else R.string.save_and_connect)
+        btnClearSession.visibility = if (isSetup) View.GONE else View.VISIBLE
         urlInput.setText(config?.url.orEmpty())
         nameInput.setText(config?.displayName.orEmpty())
         rememberCheck.isChecked = config?.remember ?: true
+        keepAwakeCheck.isChecked = keepAwake
         scale = UiScale.nearest(uiScale)
         scaleSeek.progress = UiScale.indexOf(scale)
         renderScale()

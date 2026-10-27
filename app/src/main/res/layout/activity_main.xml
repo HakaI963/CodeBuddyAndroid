@@ -8,40 +8,50 @@
     android:background="@color/bg"
     android:fitsSystemWindows="false">
 
+    <!-- ============================ CHAT SCREEN ============================ -->
     <LinearLayout
-        android:id="@+id/appColumn"
+        android:id="@+id/chatScreen"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:visibility="gone"
+        tools:visibility="visible">
 
         <LinearLayout
-            android:id="@+id/toolbar"
+            android:id="@+id/appBar"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/toolbar_height"
+            android:layout_height="@dimen/appbar_height"
             android:background="@drawable/bg_toolbar"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingStart="@dimen/toolbar_padding_h"
-            android:paddingEnd="@dimen/toolbar_padding_h">
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp">
+
+            <ImageButton
+                android:id="@+id/btnBack"
+                android:layout_width="@dimen/icon_button_size"
+                android:layout_height="@dimen/icon_button_size"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/action_home"
+                android:padding="11dp"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_arrow_back"
+                android:tint="@color/text_secondary" />
 
             <LinearLayout
-                android:id="@+id/statusBlock"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:background="?android:attr/selectableItemBackground"
-                android:clickable="true"
-                android:focusable="true"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingEnd="8dp"
-                android:paddingStart="2dp">
+                android:paddingStart="2dp"
+                android:paddingEnd="6dp">
 
                 <View
                     android:id="@+id/statusDot"
-                    android:layout_width="8dp"
-                    android:layout_height="8dp"
-                    android:layout_marginEnd="7dp"
+                    android:layout_width="7dp"
+                    android:layout_height="7dp"
+                    android:layout_marginEnd="8dp"
                     android:background="@drawable/bg_dot"
                     android:backgroundTint="@color/text_tertiary" />
 
@@ -52,7 +62,7 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/toolbarTitle"
+                        android:id="@+id/chatTitle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:ellipsize="end"
@@ -61,10 +71,10 @@
                         android:maxLines="1"
                         android:text="@string/toolbar_title"
                         android:textColor="@color/text"
-                        android:textSize="@dimen/text_toolbar_title" />
+                        android:textSize="@dimen/text_appbar" />
 
                     <TextView
-                        android:id="@+id/toolbarSubtitle"
+                        android:id="@+id/chatSubtitle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:ellipsize="end"
@@ -72,45 +82,31 @@
                         android:maxLines="1"
                         android:text="@string/toolbar_status_idle"
                         android:textColor="@color/text_tertiary"
-                        android:textSize="@dimen/text_toolbar_subtitle"
+                        android:textSize="@dimen/text_hint"
                         tools:ignore="SmallSp" />
                 </LinearLayout>
             </LinearLayout>
 
             <ImageButton
-                android:id="@+id/btnSidebar"
-                android:layout_width="@dimen/icon_button_size"
-                android:layout_height="@dimen/icon_button_size"
-                android:layout_marginStart="2dp"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/action_sidebar"
-                android:padding="9dp"
-                android:scaleType="centerInside"
-                android:src="@drawable/ic_panel"
-                android:tint="@color/text_secondary" />
-
-            <ImageButton
                 android:id="@+id/btnReload"
                 android:layout_width="@dimen/icon_button_size"
                 android:layout_height="@dimen/icon_button_size"
-                android:layout_marginStart="2dp"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
                 android:contentDescription="@string/action_reload"
-                android:padding="9dp"
+                android:padding="11dp"
                 android:scaleType="centerInside"
                 android:src="@drawable/ic_refresh"
                 android:tint="@color/text_secondary" />
 
             <ImageButton
-                android:id="@+id/btnSettings"
+                android:id="@+id/btnMore"
                 android:layout_width="@dimen/icon_button_size"
                 android:layout_height="@dimen/icon_button_size"
-                android:layout_marginStart="2dp"
                 android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/action_settings"
-                android:padding="9dp"
+                android:contentDescription="@string/action_more"
+                android:padding="11dp"
                 android:scaleType="centerInside"
-                android:src="@drawable/ic_settings"
+                android:src="@drawable/ic_more"
                 android:tint="@color/text_secondary" />
         </LinearLayout>
 
@@ -122,8 +118,7 @@
             android:indeterminate="true"
             android:indeterminateTint="@color/accent"
             android:progressBackgroundTint="@android:color/transparent"
-            android:visibility="gone"
-            tools:targetApi="lollipop" />
+            android:visibility="gone" />
 
         <FrameLayout
             android:id="@+id/webContainer"
@@ -132,13 +127,10 @@
             android:layout_weight="1"
             android:background="@color/black">
 
-            <WebView
-                android:id="@+id/webView"
+            <FrameLayout
+                android:id="@+id/webSlot"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/black"
-                android:overScrollMode="never"
-                android:scrollbars="none" />
+                android:layout_height="match_parent" />
 
             <LinearLayout
                 android:id="@+id/loadingOverlay"
@@ -146,19 +138,21 @@
                 android:layout_height="match_parent"
                 android:background="@color/bg"
                 android:clickable="true"
+                android:focusable="true"
                 android:gravity="center"
                 android:orientation="vertical"
                 android:visibility="gone">
 
                 <ProgressBar
-                    android:layout_width="26dp"
-                    android:layout_height="26dp"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
                     android:indeterminateTint="@color/accent" />
 
                 <TextView
+                    android:id="@+id/loadingLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginTop="12dp"
                     android:text="@string/loading"
                     android:textColor="@color/text_secondary"
                     android:textSize="@dimen/text_body" />
@@ -181,12 +175,12 @@
                     android:background="@drawable/bg_card"
                     android:gravity="center_horizontal"
                     android:orientation="vertical"
-                    android:padding="18dp"
+                    android:padding="20dp"
                     app:maxWidthDp="@dimen/error_max_width">
 
                     <ImageView
-                        android:layout_width="26dp"
-                        android:layout_height="26dp"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
                         android:contentDescription="@null"
                         android:src="@drawable/ic_error"
                         android:tint="@color/error" />
@@ -195,18 +189,18 @@
                         android:id="@+id/errorTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
+                        android:layout_marginTop="10dp"
                         android:gravity="center"
                         android:text="@string/error_title"
                         android:textColor="@color/text"
-                        android:textSize="15sp"
+                        android:textSize="@dimen/text_title"
                         android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/errorMessage"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
+                        android:layout_marginTop="6dp"
                         android:gravity="center"
                         android:lineSpacingExtra="2dp"
                         android:text="@string/error_generic"
@@ -216,7 +210,7 @@
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="16dp"
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
 
@@ -230,8 +224,8 @@
                             android:insetBottom="0dp"
                             android:minHeight="0dp"
                             android:minWidth="0dp"
-                            android:paddingStart="14dp"
-                            android:paddingEnd="14dp"
+                            android:paddingStart="18dp"
+                            android:paddingEnd="18dp"
                             android:stateListAnimator="@null"
                             android:text="@string/error_retry"
                             android:textAllCaps="false"
@@ -249,8 +243,8 @@
                             android:insetBottom="0dp"
                             android:minHeight="0dp"
                             android:minWidth="0dp"
-                            android:paddingStart="14dp"
-                            android:paddingEnd="14dp"
+                            android:paddingStart="18dp"
+                            android:paddingEnd="18dp"
                             android:stateListAnimator="@null"
                             android:text="@string/error_settings"
                             android:textAllCaps="false"
@@ -259,15 +253,22 @@
                     </LinearLayout>
                 </com.flux.codebuddy.ui.MaxWidthLinearLayout>
             </FrameLayout>
-
-            <FrameLayout
-                android:id="@+id/configContainer"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/bg_overlay"
-                android:clickable="true"
-                android:focusable="true"
-                android:visibility="gone" />
         </FrameLayout>
     </LinearLayout>
+
+    <!-- ============================ HOME SCREEN ============================ -->
+    <include
+        android:id="@+id/homeScreen"
+        layout="@layout/view_home" />
+
+    <!-- ======================= SETTINGS OVERLAY =========================== -->
+    <FrameLayout
+        android:id="@+id/settingsContainer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_overlay"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone" />
+
 </FrameLayout>

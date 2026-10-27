@@ -68,14 +68,15 @@ scrollable for short landscape screens.
 
 ## Decisions
 
-1. Keep the existing frontend; do not build a second mobile UI.
+1. Keep the existing chat frontend; build the *shell* natively. The home screen,
+   app bar, settings and recents list are Android views and do not read the DOM.
 2. Keep the existing composer and session list; do not reimplement chat or
    streaming.
 3. Apply only a small, height-scoped CSS layer for phones; leave tablets alone.
 4. Seed the existing sidebar as collapsed instead of adding a native session
    list, so session state stays in one place.
-5. Add a native toolbar only for status, reconnect, settings and the sidebar
-   toggle.
+5. Add a native home screen and app bar; the sidebar toggle is the only action
+   that still reaches into the page, because the drawer belongs to the SPA.
 6. Use a document-start script (`WebViewCompat.addDocumentStartJavaScript`) for
    theme/CSS injection, with a per-page fallback. No JavaScript bridge.
 7. Do not modify the CodeBuddy installation. All changes are in the Android

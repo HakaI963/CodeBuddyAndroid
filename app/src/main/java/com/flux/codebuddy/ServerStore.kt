@@ -29,6 +29,12 @@ class ServerStore(context: Context) {
         prefs.edit().putFloat(KEY_UI_SCALE, UiScale.clamp(scale)).apply()
     }
 
+    fun loadKeepAwake(): Boolean = prefs.getBoolean(KEY_KEEP_AWAKE, false)
+
+    fun saveKeepAwake(enabled: Boolean) {
+        prefs.edit().putBoolean(KEY_KEEP_AWAKE, enabled).apply()
+    }
+
     fun save(config: ServerConfig) {
         prefs.edit().apply {
             if (config.remember) {
@@ -49,5 +55,6 @@ class ServerStore(context: Context) {
         const val KEY_NAME = "display_name"
         const val KEY_REMEMBER = "remember_server"
         const val KEY_UI_SCALE = "ui_scale"
+        const val KEY_KEEP_AWAKE = "keep_awake"
     }
 }

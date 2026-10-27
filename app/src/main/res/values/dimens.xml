@@ -1,19 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="toolbar_height">40dp</dimen>
-    <dimen name="toolbar_padding_h">8dp</dimen>
-    <dimen name="icon_button_size">40dp</dimen>
-    <dimen name="icon_size">18dp</dimen>
-    <dimen name="card_radius">14dp</dimen>
+    <!-- App bar -->
+    <dimen name="appbar_height">56dp</dimen>
+    <dimen name="icon_button_size">44dp</dimen>
+
+    <!-- Cards and fields -->
+    <dimen name="card_radius">16dp</dimen>
     <dimen name="card_padding">16dp</dimen>
-    <dimen name="field_height">36dp</dimen>
-    <dimen name="button_height">36dp</dimen>
-    <dimen name="text_toolbar_title">12sp</dimen>
-    <dimen name="text_toolbar_subtitle">9sp</dimen>
-    <dimen name="text_body">12sp</dimen>
-    <dimen name="text_label">10sp</dimen>
-    <dimen name="text_hint">9sp</dimen>
-    <dimen name="text_button">11sp</dimen>
-    <dimen name="config_max_width">760dp</dimen>
+    <dimen name="screen_padding">14dp</dimen>
+    <dimen name="field_height">48dp</dimen>
+    <dimen name="button_height">46dp</dimen>
+    <dimen name="row_height">56dp</dimen>
+
+    <!-- Type -->
+    <dimen name="text_display">22sp</dimen>
+    <dimen name="text_title">16sp</dimen>
+    <dimen name="text_appbar">15sp</dimen>
+    <dimen name="text_body">14sp</dimen>
+    <dimen name="text_label">13sp</dimen>
+    <dimen name="text_hint">12sp</dimen>
+    <dimen name="text_button">14sp</dimen>
+
+    <dimen name="config_max_width">720dp</dimen>
+    <dimen name="content_max_width">720dp</dimen>
     <dimen name="error_max_width">420dp</dimen>
 </resources>

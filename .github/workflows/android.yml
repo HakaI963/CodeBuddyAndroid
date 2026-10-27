@@ -10,10 +10,15 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: android-ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     name: Test, lint, build APKs
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -107,6 +112,17 @@ jobs:
           "$BT/apksigner" verify --verbose --print-certs artifacts/CodeBuddyMobile-release.apk
           echo "===== apksigner verify (debug) ====="
           "$BT/apksigner" verify --verbose --print-certs artifacts/CodeBuddyMobile-debug.apk
+
+      - name: Upload build reports on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-reports
+          path: |
+            app/build/reports/**
+            app/build/test-results/**
+          retention-days: 7
+          if-no-files-found: ignore
 
       - name: Publish APKs to GitHub Release
         if: github.event_name != 'pull_request'

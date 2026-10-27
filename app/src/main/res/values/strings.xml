@@ -13,13 +13,37 @@
     <string name="action_sidebar">Toggle session sidebar</string>
     <string name="action_reload">Reload</string>
     <string name="action_settings">Server settings</string>
+    <string name="action_home">Home</string>
     <string name="action_close">Close</string>
+    <string name="action_more">More actions</string>
+
+    <!-- Home screen -->
+    <string name="home_subtitle">Your server stays on your machine. This app only opens it.</string>
+    <string name="home_no_server">No server configured yet.</string>
+    <string name="home_continue">Continue chat</string>
+    <string name="home_open_chat">Open chat</string>
+    <string name="home_new_chat">New chat</string>
+    <string name="home_recents">Recent conversations</string>
+    <string name="home_recents_empty">Conversations you open will appear here, so you can jump back without reloading the site.</string>
+    <string name="home_recents_clear">Clear</string>
+    <string name="home_rename_title">Rename conversation</string>
+    <string name="home_recents_cleared">Recent list cleared</string>
+    <string name="home_open_browser">Open in browser</string>
+    <string name="home_copy_url">Copy URL</string>
+    <string name="home_url_copied">Server URL copied</string>
+    <string name="home_test">Test connection</string>
+    <string name="home_version">Version %1$s (%2$d) · %3$s</string>
+    <string name="home_recent_meta">%1$s · %2$s</string>
+    <string name="home_just_now">just now</string>
+    <string name="home_minutes_ago">%1$d min ago</string>
+    <string name="home_hours_ago">%1$d h ago</string>
+    <string name="home_days_ago">%1$d d ago</string>
 
     <!-- Setup / settings -->
     <string name="setup_title">Connect to CodeBuddy</string>
     <string name="setup_subtitle">Point the app at your CodeBuddy Code server. The app is a thin shell around the existing web UI; nothing is proxied.</string>
     <string name="settings_title">Server settings</string>
-    <string name="settings_subtitle">Changing the server reloads the chat. Sessions stay on the server.</string>
+    <string name="settings_subtitle">Changing the server opens a fresh chat. Sessions stay on the server.</string>
     <string name="server_url_label">Server URL</string>
     <string name="server_url_hint">http://192.168.1.100:7890</string>
     <string name="display_name_label">Display name (optional)</string>
@@ -29,16 +53,20 @@
     <string name="ui_scale_value">%1$s× · %2$s× smaller</string>
     <string name="ui_scale_largest">%1$s× · largest</string>
     <string name="ui_scale_hint">Smaller fits more on screen. 0.17× is about 6× smaller than 1.00×.</string>
+    <string name="keep_awake">Keep the screen on while the app is open</string>
+    <string name="clear_session">Clear login and cached data</string>
+    <string name="clear_session_title">Clear login and cached data?</string>
+    <string name="clear_session_message">This signs you out of CodeBuddy on this device and clears the web cache. Your server is not affected.</string>
+    <string name="clear_session_done">Login data cleared. Log in again in the chat.</string>
     <string name="test_connection">Test connection</string>
     <string name="test_connection_short">Test</string>
     <string name="connect">Connect</string>
     <string name="save_and_connect">Save &amp; connect</string>
     <string name="cancel">Cancel</string>
     <string name="setup_lan_hint">LAN: use the Linux machine IP and port, for example http://192.168.1.100:7890. Start CodeBuddy with --host 0.0.0.0.</string>
-    <string name="setup_remote_hint">Remote: use an HTTPS reverse proxy or a VPN. Never expose port 7890 directly to the internet.</string>
     <string name="setup_security_hint">HTTP is accepted only for private/LAN addresses. Certificate validation is never bypassed.</string>
     <string name="setup_status_idle">Enter the server address to begin.</string>
-    <string name="test_hint">The test checks reachability only. It does not log in.</string>
+    <string name="settings_version">Version %1$s (%2$d)</string>
 
     <!-- Validation -->
     <string name="url_required">Enter a server URL.</string>
@@ -79,12 +107,10 @@
     <string name="error_loopback">Nothing is listening on the phone itself. Either run\nadb reverse tcp:7890 tcp:7890\non the computer and keep http://127.0.0.1:7890, or start CodeBuddy with --host 0.0.0.0 and use the computer LAN address.</string>
     <string name="error_timeout_lan">No response from the server. Check the IP address, make sure CodeBuddy runs with --host 0.0.0.0, and check that a firewall or VPN is not blocking the port.</string>
     <string name="error_stalled">The page did not finish loading. The server may be busy or the connection blocked. Tap Retry.</string>
-    <string name="error_unknown_host">Server address not found. Check the URL.</string>
     <string name="error_host_lookup">Server address not found. Check the URL and that the device is on the same network.</string>
 
     <!-- Web shell -->
     <string name="loading">Connecting to CodeBuddy…</string>
-    <string name="sidebar_unavailable">Use the panel button in the chat header.</string>
     <string name="double_back_exit">Press Back again to exit</string>
     <string name="download_started">Download started</string>
     <string name="download_unsupported">This download type is not supported by the Android web view. Use the desktop UI for blob downloads.</string>
@@ -93,8 +119,6 @@
     <string name="file_chooser_unavailable">No file picker is available.</string>
     <string name="external_link_error">No app can open this link.</string>
     <string name="js_dialog_title">CodeBuddy</string>
-    <string name="js_confirm_ok">OK</string>
-    <string name="js_confirm_cancel">Cancel</string>
     <string name="leave_page_title">Leave this page?</string>
     <string name="leave_page_message">Changes you made may not be saved.</string>
     <string name="leave_page_stay">Stay</string>
